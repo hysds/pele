@@ -1,7 +1,7 @@
 # pele
 REST API for HySDS Datasets
 
-## Create virtualenv using SciFlo system packages
+## Create virtualenv
 ```
 virtualenv --system-site-packages env
 ```
