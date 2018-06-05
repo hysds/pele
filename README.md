@@ -8,6 +8,8 @@ virtualenv --system-site-packages env
 
 ## Install Dependencies via pip
 ```
+git clone https://github.com/hysds/pele.git
+cd pele
 pip install -e .
 ```
 
