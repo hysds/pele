@@ -4,6 +4,7 @@ REST API for HySDS Datasets
 ## Create virtualenv
 ```
 virtualenv --system-site-packages env
+source env/bin/activate
 ```
 
 ## Install Dependencies via pip
