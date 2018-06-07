@@ -60,3 +60,6 @@ tmp/
 
 # settings
 settings.cfg
+
+# environments
+node_env

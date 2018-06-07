@@ -37,5 +37,6 @@ setup(
                        'coverage',
                        'webassets',
                        'lxml',
+                       'nodeenv',
                      ]
 )
