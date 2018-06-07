@@ -32,12 +32,6 @@ flask cov
 ```
 
 ## To run in development mode
-By default, development mode is on:
-```
-flask run -h 0.0.0.0 -p 8877
-```
-
-To explicitly set development mode:
 ```
 FLASK_ENV=development flask run -h 0.0.0.0 -p 8877
 ```
@@ -46,6 +40,10 @@ FLASK_ENV=development flask run -h 0.0.0.0 -p 8877
 Using flask's development web server (not recommended for production):
 ```
 FLASK_ENV=production flask run -h 0.0.0.0 -p 8877
+```
+or 
+```
+flask run -h 0.0.0.0 -p 8877
 ```
 
 Instead use gunicorn. As a daemon:

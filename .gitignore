@@ -62,4 +62,5 @@ tmp/
 settings.cfg
 
 # environments
+venv
 node_env

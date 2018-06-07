@@ -15,7 +15,7 @@ main = Blueprint('main', __name__)
 @cache.cached(timeout=1000)
 def home():
     return render_template('facetview.html',
-                           title=current_app.config['TITLE'],
+                           title=current_app.config['PELE_TITLE'],
                            badge=current_app.config['BADGE'],
                            description=current_app.config['DESCRIPTION'],
                            lineage_nodes_max=current_app.config['LINEAGE_NODES_MAX'],

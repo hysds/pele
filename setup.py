@@ -30,7 +30,7 @@ setup(
                        'pyshp',
                        'shapely==1.5.15',
                        'Cython',
-                       'Cartopy==0.13.1',
+                       #'Cartopy==0.13.1',
                        'redis',
                        'bcrypt',
                        'PyJWT',
