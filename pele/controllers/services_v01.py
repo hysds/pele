@@ -19,9 +19,9 @@ api = Api(services, ui=False, version="0.1", title="Pele REST API",
 ns = api.namespace(NAMESPACE, description="Pele REST operations")
 
 
-register_parser = api.parser()
-register_parser.add_argument('email', type=str, help='email address', location='form')
-register_parser.add_argument('password', type=str, help='password', location='form')
+login_parser = api.parser()
+login_parser.add_argument('email', type=str, help='email address', location='form')
+login_parser.add_argument('password', type=str, help='password', location='form')
 
 
 @ns.route('/register', endpoint='register')
@@ -31,23 +31,16 @@ register_parser.add_argument('password', type=str, help='password', location='fo
 class Register(Resource):
     """Register."""
 
-    @api.doc(parser=register_parser)
+    @api.doc(parser=login_parser)
     def post(self):
-        data = register_parser.parse_args()
-        print(data)
+        data = login_parser.parse_args()
+        current_app.logger.debug(data)
         user = User(**data)
-        print(user)
+        current_app.logger.debug(user)
         db.session.add(user)
-        print("Got here")
         try: db.session.commit()
-        except: print(traceback.format_exc())
-        print("Got there")
+        except: current_app.logger.debug(traceback.format_exc())
         return user.to_dict(), 201
-
-
-login_parser = api.parser()
-login_parser.add_argument('email', type=str, help='email address', location='form')
-login_parser.add_argument('password', type=str, help='password', location='form')
 
 
 @ns.route('/login', endpoint='login')
@@ -60,9 +53,9 @@ class Login(Resource):
     @api.doc(parser=login_parser)
     def post(self):
         data = login_parser.parse_args()
-        print(data)
+        current_app.logger.debug(data)
         user = User.authenticate(**data)
-        print(user)
+        current_app.logger.debug(user)
 
         if not user:
             return jsonify({ 'message': 'Invalid credentials', 'authenticated': False }), 401
@@ -72,8 +65,8 @@ class Login(Resource):
             'iat':datetime.utcnow(),
             'exp': datetime.utcnow() + timedelta(minutes=30)},
             current_app.config['SECRET_KEY'])
-        except: print(traceback.format_exc())
-        print(token)
+        except: current_app.logger.debug(traceback.format_exc())
+        current_app.logger.debug(token)
         return { 'token': token.decode('UTF-8') }
 
 
@@ -89,6 +82,7 @@ class Echo(Resource):
     @token_required
     def get(self):
         echo_str = request.args.get('echo_str', None)
+        current_app.logger.debug("echo_str: {}".format(echo_str))
         if echo_str is None:
             return {'success': False,
                     'message': "Missing echo_str parameter."}, 400

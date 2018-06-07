@@ -1,4 +1,4 @@
-import os
+import os, logging
 
 from flask import Flask
 from flask_restplus import apidoc
@@ -74,6 +74,11 @@ def create_app(object_name):
     app = Flask(__name__)
     app.config.from_object(object_name)
     app.config.from_pyfile('../settings.cfg') # override
+
+    # set debug logging level
+    if app.config.get('DEBUG', False):
+        app.logger.setLevel(logging.DEBUG)
+
     cors.init_app(app)
     app.wsgi_app = ReverseProxied(app.wsgi_app)
 

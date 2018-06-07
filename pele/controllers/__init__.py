@@ -28,25 +28,25 @@ def token_required(f):
         }
 
         token = request.headers.get('X-API-KEY', None)
-        print("token: {}".format(token))
+        current_app.logger.debug("token: {}".format(token))
         if token is None: return invalid_msg, 401
 
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
-            print("data: {}".format(data))
+            current_app.logger.debug("data: {}".format(data))
             user = User.query.filter_by(email=data['sub']).first()
             if not user:
                 return { 'message': 'User not found',
                          'authenticated': False }, 401
             return f(*args, **kwargs)
         except jwt.ExpiredSignatureError:
-            print("jwt.ExpiredSignatureError: {}".format(traceback.format_exc()))
+            current_app.logger.debug("jwt.ExpiredSignatureError: {}".format(traceback.format_exc()))
             return expired_msg, 401
         except jwt.InvalidTokenError:
-            print("jwt.InvalidTokenError: {}".format(traceback.format_exc()))
+            current_app.logger.debug("jwt.InvalidTokenError: {}".format(traceback.format_exc()))
             return invalid_msg, 401
         except Exception, e:
-            print(traceback.format_exc())
+            current_app.logger.debug(traceback.format_exc())
             return { 'message': "Uknown error: {}".format(str(e)),
                      'authenticated': False }, 401
 
