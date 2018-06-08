@@ -2,7 +2,7 @@ import os, sys, json, requests, traceback, jwt
 from datetime import datetime, timedelta
 
 from flask import Blueprint, request, Response, current_app
-from flask_restplus import Api, apidoc, Resource, fields
+from flask_restplus import Api, apidoc, Resource, fields, inputs
 from flask_login import login_user, logout_user, login_required
 
 from pele import db, cache
@@ -10,21 +10,21 @@ from pele.controllers import token_required, authorizations
 from pele.models.user import User
 
 
-NAMESPACE = "pele"
-
 services = Blueprint('api_v0-1', __name__, url_prefix='/api/v0.1')
 api = Api(services, ui=False, version="0.1", title="Pele REST API",
           description="REST API for HySDS Datasets.",
           authorizations=authorizations)
-ns = api.namespace(NAMESPACE, description="Pele REST operations")
+test_ns = api.namespace('test', description="test operations")
 
 
 login_parser = api.parser()
-login_parser.add_argument('email', type=str, help='email address', location='form')
-login_parser.add_argument('password', type=str, help='password', location='form')
+login_parser.add_argument('email', required=True, type=inputs.email(),
+                          help='email address', location='form')
+login_parser.add_argument('password', required=True, type=str, 
+                          help='password', location='form')
 
 
-@ns.route('/register', endpoint='register')
+@api.route('/register', endpoint='register')
 @api.doc(responses={ 200: "Success",
                      401: "Unathorized",
                      500: "Register failed" }, description="Register.")
@@ -43,7 +43,7 @@ class Register(Resource):
         return user.to_dict(), 201
 
 
-@ns.route('/login', endpoint='login')
+@api.route('/login', endpoint='login')
 @api.doc(responses={ 200: "Success",
                      401: "Unathorized",
                      500: "Login failed" }, description="Login.")
@@ -72,7 +72,7 @@ class Login(Resource):
         return { 'token': token.decode('UTF-8') }
 
 
-@ns.route('/echo', endpoint='echo')
+@test_ns.route('/echo', endpoint='echo')
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      500: "Echo execution failed" },
