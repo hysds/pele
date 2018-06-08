@@ -65,7 +65,9 @@ class Login(Resource):
             'iat':datetime.utcnow(),
             'exp': datetime.utcnow() + timedelta(minutes=30)},
             current_app.config['SECRET_KEY'])
-        except: current_app.logger.debug(traceback.format_exc())
+        except:
+            current_app.logger.debug(traceback.format_exc())
+            raise
         current_app.logger.debug(token)
         return { 'token': token.decode('UTF-8') }
 

@@ -1,4 +1,4 @@
-import jwt, datetime
+import datetime
 
 from flask import current_app
 from pele import db, bcrypt, login_manager
