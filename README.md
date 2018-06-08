@@ -142,3 +142,17 @@ In [36]: r = requests.get(base_url + '/test/echo', params={'echo_str': 'hello wo
 In [37]: r.json()
 Out[37]: {u'message': u'hello world', u'success': True}
 ```
+
+### use the Pele requests client to handle token expiration/refreshing for you
+```
+from pele.lib.client import PeleRequests
+
+    
+base_url = "http://localhost:8877/api/v0.1"
+
+# instantiate PeleRequests object
+pr = PeleRequests(base_url)
+
+# now use like requests module (`request()`, `get()`, `head()`, `post()`, `put()`, `delete()`, `patch()`)
+r = pr.get(base_url + '/test/echo', params={'echo_str': 'hello world'})
+```
