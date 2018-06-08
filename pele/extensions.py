@@ -5,6 +5,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_login import LoginManager
 from flask_assets import Environment
 from flask_sqlalchemy import SQLAlchemy
+from flask_httpauth import HTTPBasicAuth
 
 
 # setup flask cache
@@ -28,3 +29,6 @@ cors = CORS()
 
 # setup sqlalchemy
 db = SQLAlchemy()
+
+# setup http basic auth
+auth = HTTPBasicAuth()

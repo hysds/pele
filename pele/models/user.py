@@ -1,7 +1,17 @@
 import datetime
 
-from flask import current_app
+from flask import current_app, g
 from pele import db, bcrypt, login_manager
+from pele.extensions import auth
+
+
+def authenticate(cls, email, password):
+    """Authenticate and return user."""
+
+    user = User.query.filter_by(email=email).first()
+    if not user or not bcrypt.check_password_hash(user.password, password):
+        return None
+    return user
 
 
 class User(db.Model):
@@ -21,15 +31,19 @@ class User(db.Model):
     def authenticate(cls, **kwargs):
         email = kwargs.get('email')
         password = kwargs.get('password')
-
         if not email or not password:
             return None
-
-        user = cls.query.filter_by(email=email).first()
-        if not user or not bcrypt.check_password_hash(user.password, password):
-            return None
-
-        return user
+        return authenticate(cls, email, password)
 
     def to_dict(self):
         return dict(id=self.id, email=self.email)
+
+
+@auth.verify_password
+def verify_password(email, password):
+    """Return True if user is verified False otherwise."""
+
+    user = authenticate(User, email, password)
+    if user is None: return False
+    g.user = user
+    return True

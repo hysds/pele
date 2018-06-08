@@ -18,6 +18,7 @@ setup(
                        'Flask-Caching',
                        'Flask-Cors',
                        'Flask-DebugToolbar',
+                       'Flask-HTTPAuth',
                        'Flask-Login',
                        'Flask-Migrate',
                        'Flask-RestPlus',
