@@ -15,7 +15,9 @@ services = Blueprint('api_v0-1', __name__, url_prefix='/api/v0.1')
 api = Api(services, ui=False, version="0.1", title="Pele REST API",
           description="REST API for HySDS Datasets.",
           authorizations=authorizations)
-test_ns = api.namespace('test', description="test operations")
+
+
+# default namespace operations
 
 
 login_parser = api.parser()
@@ -66,6 +68,12 @@ class Login(Resource):
             current_app.logger.debug(traceback.format_exc())
             raise
         return { 'token': token.decode('UTF-8') }
+
+
+# test namespace operations
+
+
+test_ns = api.namespace('test', description="test operations")
 
 
 @test_ns.route('/echo', endpoint='echo')
