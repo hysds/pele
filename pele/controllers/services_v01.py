@@ -1,7 +1,7 @@
 import os, sys, json, requests, traceback, jwt
 from datetime import datetime, timedelta
 
-from flask import jsonify, Blueprint, request, Response, current_app
+from flask import Blueprint, request, Response, current_app
 from flask_restplus import Api, apidoc, Resource, fields
 from flask_login import login_user, logout_user, login_required
 
@@ -53,12 +53,12 @@ class Login(Resource):
     @api.doc(parser=login_parser)
     def post(self):
         data = login_parser.parse_args()
-        current_app.logger.debug(data)
+        #current_app.logger.debug(data)
         user = User.authenticate(**data)
-        current_app.logger.debug(user)
+        #current_app.logger.debug(user)
 
         if not user:
-            return jsonify({ 'message': 'Invalid credentials', 'authenticated': False }), 401
+            return { 'message': 'Invalid credentials', 'authenticated': False }, 401
 
         try: token = jwt.encode({
             'sub': user.email,
