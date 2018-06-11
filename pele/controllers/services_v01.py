@@ -105,9 +105,9 @@ class Echo(Resource):
         'message': fields.String(description="echo output"),
     })
 
+    @token_required
     @api.marshal_with(model)
     @api.doc(parser=parser, security='apikey')
-    @token_required
     def get(self):
         echo_str = request.args.get('echo_str', None)
         if echo_str is None:
@@ -138,9 +138,9 @@ class Datasets(Resource):
         'datasets': fields.List(fields.String, description="datasets"),
     })
 
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
-    @token_required
     def get(self):
         
         datasets = QueryES(current_app.config['ES_URL'], current_app.config['ES_INDEX']).query_datasets()
