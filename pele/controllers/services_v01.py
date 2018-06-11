@@ -64,8 +64,8 @@ class Login(Resource):
         'token': fields.String(description="API token"),
     })
 
-    @api.marshal_with(model)
     @auth.login_required
+    @api.marshal_with(model)
     def post(self):
         user = g.user
         if not user:
