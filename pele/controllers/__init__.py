@@ -20,11 +20,11 @@ def token_required(f):
 
         invalid_msg = {
             'message': 'Invalid token. Registeration and/or authentication required',
-            'authenticated': False
+            'success': False
         }
         expired_msg = {
             'message': 'Expired token. Reauthentication required.',
-            'authenticated': False
+            'success': False
         }
 
         token = request.headers.get('X-API-KEY', None)
@@ -37,7 +37,7 @@ def token_required(f):
             user = User.query.filter_by(email=data['sub']).first()
             if not user:
                 return { 'message': 'User not found',
-                         'authenticated': False }, 401
+                         'success': False }, 401
             return f(*args, **kwargs)
         except jwt.ExpiredSignatureError:
             current_app.logger.debug("jwt.ExpiredSignatureError: {}".format(traceback.format_exc()))
@@ -47,7 +47,7 @@ def token_required(f):
             return invalid_msg, 401
         except Exception, e:
             current_app.logger.debug(traceback.format_exc())
-            return { 'message': "Uknown error: {}".format(str(e)),
-                     'authenticated': False }, 401
+            return { 'message': "Unknown error: {}".format(str(e)),
+                     'success': False }, 401
 
     return _verify

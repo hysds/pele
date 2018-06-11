@@ -21,13 +21,6 @@ api = Api(services, ui=False, version="0.1", title="Pele REST API",
 # default namespace operations
 
 
-login_parser = api.parser()
-login_parser.add_argument('email', required=True, type=inputs.email(),
-                          help='email address', location='form')
-login_parser.add_argument('password', required=True, type=str, 
-                          help='password', location='form')
-
-
 @api.route('/register', endpoint='register')
 @api.doc(responses={ 200: "Success",
                      401: "Unathorized",
@@ -35,9 +28,22 @@ login_parser.add_argument('password', required=True, type=str,
 class Register(Resource):
     """Register."""
 
-    @api.doc(parser=login_parser)
+    parser = api.parser()
+    parser.add_argument('email', required=True, type=inputs.email(),
+                        help='email address', location='form')
+    parser.add_argument('password', required=True, type=str, 
+                        help='password', location='form')
+
+
+    model = api.model('Register', {
+        'email': fields.String(description="email"),
+        'id': fields.Integer(description="id"),
+    })
+
+    @api.marshal_with(model)
+    @api.doc(parser=parser)
     def post(self):
-        data = login_parser.parse_args()
+        data = self.parser.parse_args()
         user = User(**data)
         db.session.add(user)
         try: db.session.commit()
@@ -54,11 +60,16 @@ class Register(Resource):
 class Login(Resource):
     """Login."""
 
+    model = api.model('Login', {
+        'token': fields.String(description="API token"),
+    })
+
+    @api.marshal_with(model)
     @auth.login_required
     def post(self):
         user = g.user
         if not user:
-            return { 'message': 'Invalid credentials', 'authenticated': False }, 401
+            return { 'message': 'Invalid credentials' }, 401
 
         try: token = jwt.encode({
             'sub': user.email,
@@ -85,7 +96,17 @@ test_ns = api.namespace('test', description="test operations")
 class Echo(Resource):
     """Echo."""
 
-    @api.doc(params={ 'echo_str': 'string to echo' }, security='apikey')
+    parser = api.parser()
+    parser.add_argument('echo_str', required=True, type=str,
+                        help='string to echo')
+
+    model = api.model('Echo', {
+        'success': fields.Boolean(description="success flag"),
+        'message': fields.String(description="echo output"),
+    })
+
+    @api.marshal_with(model)
+    @api.doc(parser=parser, security='apikey')
     @token_required
     def get(self):
         echo_str = request.args.get('echo_str', None)
@@ -111,6 +132,13 @@ pele_ns = api.namespace('pele', description="pele operations")
 class Datasets(Resource):
     """Datasets."""
 
+    model = api.model('Dataset', {
+        'success': fields.Boolean(description="success flag"),
+        'message': fields.String(description="message"),
+        'datasets': fields.List(fields.String, description="datasets"),
+    })
+
+    @api.marshal_with(model)
     @api.doc(security='apikey')
     @token_required
     def get(self):
