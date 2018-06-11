@@ -144,6 +144,15 @@ Out[37]: {u'message': u'hello world', u'success': True}
 ```
 
 ### use the Pele requests client to handle token expiration/refreshing for you
+Ensure your login creds are set in your .netrc file, e.g.
+```
+cat ~/.netrc
+machine localhost login gerald@test.com password test
+macdef init
+
+
+```
+The Pele requests client will then use your creds to attain an API token to use for subsequent API calls. When the token expires, the client will refresh the token automatically:
 ```
 from pele.lib.client import PeleRequests
 
