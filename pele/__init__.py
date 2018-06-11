@@ -99,11 +99,8 @@ def create_app(object_name):
     from controllers.main import main
     app.register_blueprint(main)
 
-    from controllers.services_v01 import services as services_v01
-    app.register_blueprint(services_v01)
-
-    from controllers.services_v02 import services as services_v02
-    app.register_blueprint(services_v02)
+    from controllers.api_v01 import services as api_v01
+    app.register_blueprint(api_v01)
 
     app.register_blueprint(apidoc.apidoc)
 
