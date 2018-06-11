@@ -62,7 +62,7 @@ class Login(Resource):
         try: token = jwt.encode({
             'sub': user.email,
             'iat':datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(seconds=30)},
+            'exp': datetime.utcnow() + timedelta(seconds=current_app.config['TOKEN_EXPIRATION_SECS'])},
             current_app.config['SECRET_KEY'])
         except:
             current_app.logger.debug(traceback.format_exc())
