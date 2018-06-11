@@ -28,6 +28,7 @@ setup(
                        'Flask-WTF',
                        'simpleldap',
                        'elasticsearch>=1.0.0,<2.0.0',
+                       'elasticsearch-dsl<2.0.0',
                        'pyshp',
                        'shapely==1.5.15',
                        'Cython',

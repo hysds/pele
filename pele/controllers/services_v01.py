@@ -9,6 +9,7 @@ from pele import db, cache
 from pele.extensions import auth
 from pele.controllers import token_required, authorizations
 from pele.models.user import User
+from pele.lib.query import QueryES
 
 
 services = Blueprint('api_v0-1', __name__, url_prefix='/api/v0.1')
@@ -92,5 +93,28 @@ class Echo(Resource):
             return {'success': False,
                     'message': "Missing echo_str parameter."}, 400
 
-        return {'success': True,
-                'message': "{}".format(echo_str) }
+        return { 'success': True,
+                 'message': "{}".format(echo_str) }
+
+
+# pele namespace operations
+
+
+pele_ns = api.namespace('pele', description="pele operations")
+
+
+@pele_ns.route('/datasets', endpoint='datasets')
+@api.doc(responses={ 200: "Success",
+                     400: "Invalid parameters",
+                     500: "Execution failed" },
+         description="Get all dataset types.")
+class Datasets(Resource):
+    """Datasets."""
+
+    @api.doc(security='apikey')
+    @token_required
+    def get(self):
+        
+        datasets = QueryES(current_app.config['ES_URL'], current_app.config['ES_INDEX']).query_datasets()
+        return { 'success': True,
+                 'datasets': datasets }
