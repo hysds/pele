@@ -87,8 +87,6 @@ class QueryES():
         }
         """
     
-        #s = Search(using=self.client, index=self.es_index).query(Q('term', dataset_type__raw=dataset_type)).fields(['_id'])
-        #return [i['_id'] for i in s[:s.count()]]
         s = Search(using=self.client, index=self.es_index).extra(size=0)
         q = Q('term', dataset_type__raw=dataset_type)
         a = A('terms', field='dataset.raw', size=0)
@@ -96,3 +94,28 @@ class QueryES():
         s.aggs.bucket('datasets', a)
         resp = s.execute()
         return [i['key'] for i in resp.aggregations.to_dict()['datasets']['buckets']]
+
+    def query_granules_by_dataset(self, dataset):
+        """Return list of granules by dataset:
+    
+        {
+          "query": {
+            "term": {
+              "dataset_type.raw": "area_of_interest"
+            }
+          }, 
+          "aggs": {
+            "datasets": {
+              "terms": {
+                "field": "dataset.raw", 
+                "size": 0
+              }
+            }
+          }, 
+          "size": 0
+        }
+        """
+    
+        s = Search(using=self.client, index=self.es_index).query(Q('term', dataset__raw=dataset)).fields(['_id'])
+        current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
+        return [i['_id'] for i in s[:s.count()]]

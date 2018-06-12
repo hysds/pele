@@ -81,3 +81,30 @@ class DatasetsByType(Resource):
                            current_app.config['ES_INDEX']).query_datasets_by_type(dataset_type)
         return { 'success': True,
                  'datasets': datasets }
+
+
+@pele_ns.route('/dataset/<string:dataset>/granules', endpoint='granules_by_dataset')
+@pele_ns.param('dataset', 'dataset')
+@api.doc(responses={ 200: "Success",
+                     400: "Invalid parameters",
+                     401: "Unathorized",
+                     500: "Execution failed" },
+         description="Get all granules by dataset.")
+class GranulesByDataset(Resource):
+    """Granules by dataset."""
+
+    model = api.model('GranulesByDataset', {
+        'success': fields.Boolean(description="success flag"),
+        'message': fields.String(description="message"),
+        'granules': fields.List(fields.String, description="granules"),
+    })
+
+    @token_required
+    @api.marshal_with(model)
+    @api.doc(security='apikey')
+    def get(self, dataset):
+        
+        granules = QueryES(current_app.config['ES_URL'], 
+                           current_app.config['ES_INDEX']).query_granules_by_dataset(dataset)
+        return { 'success': True,
+                 'granules': granules }
