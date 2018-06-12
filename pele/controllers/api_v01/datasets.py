@@ -55,7 +55,9 @@ class Types(Resource):
         return { 'success': True,
                  'types': types }
 
+
 @pele_ns.route('/dataset/type/<string:dataset_type>', endpoint='datasets_by_type')
+@pele_ns.param('dataset_type', 'dataset type')
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
@@ -63,10 +65,6 @@ class Types(Resource):
          description="Get all dataset types.")
 class DatasetsByType(Resource):
     """Datasets by type."""
-
-    parser = api.parser()
-    parser.add_argument('dataset_type', required=True, type=str,
-                        help='dataset type')
 
     model = api.model('DatasetsByType', {
         'success': fields.Boolean(description="success flag"),
@@ -76,7 +74,7 @@ class DatasetsByType(Resource):
 
     @token_required
     @api.marshal_with(model)
-    @api.doc(parser=parser, security='apikey')
+    @api.doc(security='apikey')
     def get(self, dataset_type):
         
         datasets = QueryES(current_app.config['ES_URL'], 
