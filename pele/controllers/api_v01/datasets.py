@@ -1,6 +1,7 @@
 from flask import current_app
 from flask_restplus import Resource, fields, inputs
 
+from pele import limiter
 from pele.controllers import token_required
 from pele.lib.query import QueryES
 from pele.controllers.api_v01.config import api, pele_ns
@@ -20,6 +21,8 @@ class Types(Resource):
         'message': fields.String(description="message"),
         'types': fields.List(fields.String, description="types"),
     })
+
+    decorators = [limiter.limit("1/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -45,6 +48,8 @@ class Datasets(Resource):
         'message': fields.String(description="message"),
         'datasets': fields.List(fields.String, description="datasets"),
     })
+
+    decorators = [limiter.limit("1/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -72,6 +77,8 @@ class DatasetsByType(Resource):
         'datasets': fields.List(fields.String, description="datasets"),
     })
 
+    decorators = [limiter.limit("1/second")]
+
     @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
@@ -98,6 +105,8 @@ class GranulesByDataset(Resource):
         'message': fields.String(description="message"),
         'granules': fields.List(fields.String, description="granules"),
     })
+
+    decorators = [limiter.limit("1/second")]
 
     @token_required
     @api.marshal_with(model)

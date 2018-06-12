@@ -10,6 +10,11 @@ class PeleRequests():
 
     def _set_token(self):
         r = self.session.post(self.base_url + '/login')
+        if r.status_code == 429 and 'Retry-After' in r.headers:
+            sleep_time = float(r.headers['Retry-After'])
+            print("hit rate limit. sleeping for {} seconds".format(sleep_time))
+            time.sleep(sleep_time)
+            r = self.session.post(self.base_url + '/login')
         r.raise_for_status()
         self.token = r.json()['token']
 

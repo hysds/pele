@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from flask import current_app, g
 from flask_restplus import Resource, fields, inputs
 
-from pele import db, cache
+from pele import db, cache, limiter
 from pele.extensions import auth
 from pele.models.user import User
 from pele.controllers.api_v01.config import api
@@ -25,6 +25,7 @@ class Register(Resource):
     parser.add_argument('password', required=True, type=str, 
                         help='password', location='form')
 
+    decorators = [limiter.limit("1/minute")]
 
     model = api.model('Register', {
         'success': fields.Boolean(description="success flag"),
@@ -63,6 +64,8 @@ class Login(Resource):
         'message': fields.String(description="message"),
         'token': fields.String(description="API token"),
     })
+
+    decorators = [limiter.limit("1/minute")]
 
     @auth.login_required
     @api.marshal_with(model)

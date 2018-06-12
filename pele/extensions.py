@@ -6,6 +6,8 @@ from flask_login import LoginManager
 from flask_assets import Environment
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
+from flask_limiter import Limiter
+from flask_limiter.util import get_ipaddr
 
 
 # setup flask cache
@@ -32,3 +34,6 @@ db = SQLAlchemy()
 
 # setup http basic auth
 auth = HTTPBasicAuth()
+
+# set up limiter
+limiter = Limiter(key_func=get_ipaddr)

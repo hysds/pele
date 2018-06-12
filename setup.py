@@ -19,6 +19,7 @@ setup(
                        'Flask-Cors',
                        'Flask-DebugToolbar',
                        'Flask-HTTPAuth',
+                       'Flask-Limiter',
                        'Flask-Login',
                        'Flask-Migrate',
                        'Flask-RestPlus',

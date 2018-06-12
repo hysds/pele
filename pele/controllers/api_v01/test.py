@@ -1,6 +1,7 @@
 from flask import request, current_app, g
 from flask_restplus import Resource, fields, inputs
 
+from pele import limiter
 from pele.controllers import token_required
 from pele.controllers.api_v01.config import api, test_ns
 
@@ -22,6 +23,8 @@ class Echo(Resource):
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="echo output"),
     })
+
+    decorators = [limiter.limit("1/second")]
 
     @token_required
     @api.marshal_with(model)

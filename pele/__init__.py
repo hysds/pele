@@ -6,7 +6,7 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 from pele import assets
 from pele.extensions import ( cache, assets_env, debug_toolbar, 
-login_manager, cors, bcrypt, db )
+login_manager, cors, bcrypt, db, limiter )
 
 
 class ReverseProxied(object):
@@ -88,6 +88,7 @@ def create_app(object_name):
     bcrypt.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
+    limiter.init_app(app)
 
     # Import and register the different asset bundles
     assets_env.init_app(app)
