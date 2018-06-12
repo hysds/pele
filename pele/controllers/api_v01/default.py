@@ -14,7 +14,8 @@ from pele.controllers.api_v01.config import api
 @api.route('/register', endpoint='register')
 @api.doc(responses={ 201: "Success",
                      400: "Invalid parameters",
-                     500: "Registration failed" }, description="Registration.")
+                     500: "Registration failed" },
+         description="User registration.")
 class Register(Resource):
     """Register."""
 
@@ -52,7 +53,8 @@ class Register(Resource):
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
-                     500: "Login failed" }, description="Login.")
+                     500: "Login failed" },
+         description="Login and receive API token.")
 class Login(Resource):
     """Login."""
 

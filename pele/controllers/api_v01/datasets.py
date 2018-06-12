@@ -11,7 +11,7 @@ from pele.controllers.api_v01.config import api, pele_ns
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all types.")
+         description="Get all dataset types.")
 class Types(Resource):
     """Types."""
 
@@ -36,7 +36,7 @@ class Types(Resource):
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all datasets.")
+         description="Get all datasets/collections.")
 class Datasets(Resource):
     """Datasets."""
 
@@ -62,9 +62,9 @@ class Datasets(Resource):
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all datasets by type.")
+         description="Get all datasets/collections by dataset type.")
 class DatasetsByType(Resource):
-    """Datasets by type."""
+    """Datasets/collections by type."""
 
     model = api.model('DatasetsByType', {
         'success': fields.Boolean(description="success flag"),
@@ -89,7 +89,7 @@ class DatasetsByType(Resource):
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all granules by dataset.")
+         description="Get all granules by dataset/collection.")
 class GranulesByDataset(Resource):
     """Granules by dataset."""
 
