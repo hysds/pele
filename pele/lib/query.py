@@ -75,11 +75,24 @@ class QueryES():
               "dataset_type.raw": "area_of_interest"
             }
           }, 
-          "fields": [
-            "_id"
-          ]
+          "aggs": {
+            "datasets": {
+              "terms": {
+                "field": "dataset.raw", 
+                "size": 0
+              }
+            }
+          }, 
+          "size": 0
         }
         """
     
-        s = Search(using=self.client, index=self.es_index).query(Q('term', dataset_type__raw=dataset_type)).fields(['_id'])
-        return [i['_id'] for i in s[:s.count()]]
+        #s = Search(using=self.client, index=self.es_index).query(Q('term', dataset_type__raw=dataset_type)).fields(['_id'])
+        #return [i['_id'] for i in s[:s.count()]]
+        s = Search(using=self.client, index=self.es_index).extra(size=0)
+        q = Q('term', dataset_type__raw=dataset_type)
+        a = A('terms', field='dataset.raw', size=0)
+        s = s.query(q)
+        s.aggs.bucket('datasets', a)
+        resp = s.execute()
+        return [i['key'] for i in resp.aggregations.to_dict()['datasets']['buckets']]
