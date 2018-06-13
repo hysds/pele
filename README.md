@@ -70,7 +70,7 @@ In [2]: from requests.auth import HTTPBasicAuth
 
 In [3]: base_url = 'http://localhost:8877/api/v0.1'
 
-In [4]: r = requests.post(base_url + '/login', auth=HTTPBasicAuth('gerald@test.com', 'test'))
+In [4]: r = requests.post(base_url + '/login', auth=HTTPBasicAuth('koa@test.com', 'test'), verify=False)
 
 In [5]: r.status_code
 Out[5]: 401
@@ -78,76 +78,92 @@ Out[5]: 401
 In [6]: r.content
 Out[6]: 'Unauthorized Access'
 
-In [7]: r = requests.post(base_url + '/register', data={'email': 'gerald@test.com', 'password': 'test'})
+In [7]: r = requests.post(base_url + '/register', data={'email': 'koa@test.com', 'password': 'test'}, verify=False)
 
 In [8]: r.status_code
 Out[8]: 201
 
 In [9]: r.json()
-Out[9]: {u'email': u'gerald@test.com', u'id': 1}
+Out[9]: {u'email': u'koa@test.com',
+ u'id': 2,
+ u'message': u'Verification email sent. Verify before using the API.',
+ u'success': True}
 ```
 
-### get API token
+### verify user
 ```
-In [10]: r = requests.post(base_url + '/login', auth=HTTPBasicAuth('gerald@test.com', 'test'))
+In [10]: r = requests.post(base_url + '/verify', data={'email': 'koa@test.com', 'verification_code': '3d990a2e-f036-44c4-86ad-f33cfe894ef3'}, verify=False)
 
 In [11]: r.status_code
 Out[11]: 200
 
 In [12]: r.json()
-Out[12]: {u'token': u'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1Mjg0MjczNzIsInN1YiI6ImdlcmFsZEB0ZXN0LmNvbSIsImV4cCI6MTUyODQyOTE3Mn0.dlR4ZJzXDzi8dsiaq6ZdXTqT6TJPtI_7IHnCyCDoio0'}
+Out[12]: 
+{u'message': u'Mahalo for verifying. You may now login to receive an API token.',
+ u'success': True}
+```
 
-In [13]: token = r.json()['token']
+### login to get API token
+```
+In [13]: r = requests.post(base_url + '/login', auth=HTTPBasicAuth('koa@test.com', 'test'), verify=False)
+
+In [14]: r.status_code
+Out[14]: 200
+
+In [15]: r.json()
+Out[15]: {u'token': u'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1Mjg0MjczNzIsInN1YiI6ImdlcmFsZEB0ZXN0LmNvbSIsImV4cCI6MTUyODQyOTE3Mn0.dlR4ZJzXDzi8dsiaq6ZdXTqT6TJPtI_7IHnCyCDoio0'}
+
+In [16]: token = r.json()['token']
 ```
 
 ### call restricted API using token
 ```
-In [15]: r = requests.get(base_url + '/test/echo', params={'echo_str': 'hello world'})
+In [17]: r = requests.get(base_url + '/test/echo', params={'echo_str': 'hello world'})
 
-In [16]: r.status_code
-Out[16]: 401
+In [18]: r.status_code
+Out[18]: 401
 
-In [17]: r.json()
-Out[17]: 
+In [19]: r.json()
+Out[19]: 
 {u'authenticated': False,
  u'message': u'Invalid token. Registeration and/or authentication required'}
 
-In [19]: r = requests.get(base_url + '/test/echo', params={'echo_str': 'hello world'}, headers={'X-API-KEY': token})
+In [20]: r = requests.get(base_url + '/test/echo', params={'echo_str': 'hello world'}, headers={'X-API-KEY': token})
 
-In [20]: r.status_code
-Out[20]: 200
+In [21]: r.status_code
+Out[21]: 200
 
-In [21]: r.json()
-Out[21]: {u'message': u'hello world', u'success': True}
+In [22]: r.json()
+Out[22]: {u'message': u'hello world', u'success': True}
 ```
 
 ### refresh API token after expiration
 ```
-In [31]: r = requests.get(base_url + '/test/echo', params={'echo_str': 'hello world'}, headers={'X-API-KEY': token})
+In [23]: r = requests.get(base_url + '/test/echo', params={'echo_str': 'hello world'}, headers={'X-API-KEY': token})
 
-In [32]: r.status_code
-Out[32]: 401
+In [24]: r.status_code
+Out[24]: 401
 
-In [33]: r.json()
-Out[33]: 
+In [25]: r.json()
+Out[25]: 
 {u'authenticated': False,
  u'message': u'Expired token. Reauthentication required.'}
 
-In [34]: r = requests.post(base_url + '/login', auth=HTTPBasicAuth('test@test.com', 'test'))
+In [26]: r = requests.post(base_url + '/login', auth=HTTPBasicAuth('koa@test.com', 'test'))
 
-In [35]: token = r.json()['token']
+In [27]: token = r.json()['token']
 
-In [36]: r = requests.get(base_url + '/test/echo', params={'echo_str': 'hello world'}, headers={'X-API-KEY': token})
+In [28]: r = requests.get(base_url + '/test/echo', params={'echo_str': 'hello world'}, headers={'X-API-KEY': token})
 
-In [37]: r.json()
-Out[37]: {u'message': u'hello world', u'success': True}
+In [29]: r.json()
+Out[29]: {u'message': u'hello world', u'success': True}
 ```
 
 ### use the Pele requests client to handle token expiration/refreshing for you
 Ensure your login creds are set in your .netrc file, e.g.
 ```
 cat ~/.netrc
-machine localhost login gerald@test.com password test
+machine localhost login koa@test.com password test
 macdef init
 
 
