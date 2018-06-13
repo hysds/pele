@@ -1,10 +1,11 @@
-import traceback, jwt
+import traceback, jwt, uuid
 from datetime import datetime, timedelta
 
-from flask import current_app, g
+from flask import current_app, g, url_for
 from flask_restplus import Resource, fields, inputs
+from flask_mail import Message
 
-from pele import db, cache, limiter
+from pele import db, cache, limiter, mail
 from pele.extensions import auth
 from pele.models.user import User
 from pele.controllers.api_v01.config import api
@@ -38,6 +39,7 @@ class Register(Resource):
     @api.doc(parser=parser)
     def post(self):
         data = self.parser.parse_args()
+        data['verification_code'] = str(uuid.uuid4())
         user = User(**data)
         db.session.add(user)
         try: db.session.commit()
@@ -45,6 +47,11 @@ class Register(Resource):
             current_app.logger.debug(traceback.format_exc())
             return { 'success': False,
                      'message': "Registration failed. Please contact support." }, 500
+        msg = Message("Verify your Pele API account", recipients=[user.email])
+        msg.body = "Use your verification code below to verify your Pele API " + \
+                   "account at {}:\n\n{}".format(url_for('api_v0-1.doc', _external=True),
+                                                 data['verification_code'])
+        mail.send(msg)
         user_dict = user.to_dict()
         user_dict['success'] = True
         user_dict['message'] = "Verification email sent. Verify before using the API."
@@ -63,7 +70,7 @@ class Verify(Resource):
     parser = api.parser()
     parser.add_argument('email', required=True, type=inputs.email(),
                         help='email address', location='form')
-    parser.add_argument('vcode', required=True, type=str, 
+    parser.add_argument('verification_code', required=True, type=str, 
                         help='verification code', location='form')
 
     model = api.model('Verify', {

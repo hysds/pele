@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
 from flask_limiter import Limiter
 from flask_limiter.util import get_ipaddr
+from flask_mail import Mail
 
 
 # setup flask cache
@@ -37,3 +38,6 @@ auth = HTTPBasicAuth()
 
 # set up limiter
 limiter = Limiter(key_func=get_ipaddr)
+
+# set up mail
+mail = Mail()

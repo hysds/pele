@@ -21,6 +21,7 @@ setup(
                        'Flask-HTTPAuth',
                        'Flask-Limiter',
                        'Flask-Login',
+                       'Flask-Mail',
                        'Flask-Migrate',
                        'Flask-RestPlus',
                        'Flask-Script',
