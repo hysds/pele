@@ -3,6 +3,7 @@ import traceback, jwt
 
 from flask import request, current_app
 
+from pele import login_manager
 from pele.models.user import User
 
 
@@ -51,3 +52,8 @@ def token_required(f):
                      'success': False }, 401
 
     return _verify
+
+
+@login_manager.user_loader
+def load_user(username):
+    return User.query.get(username)

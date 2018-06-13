@@ -1,4 +1,4 @@
-import datetime
+import datetime, uuid
 
 from flask import current_app, g
 from pele import db, bcrypt, login_manager
@@ -11,6 +11,22 @@ def authenticate(cls, email, password):
     user = User.query.filter_by(email=email).first()
     if not user or not bcrypt.check_password_hash(user.password, password):
         return None
+    if not user.verified:
+        current_app.logger.debug("User {} not verified.".format(user.email))
+        return None
+    return user
+
+
+def verify(cls, email, vcode):
+    """Verify email address."""
+
+    user = User.query.filter_by(email=email).first()
+    if not user or not bcrypt.check_password_hash(user.verification_code, vcode):
+        return None
+    if user.verified: return user
+    user.verified = True
+    user.verified_on = datetime.datetime.now()
+    db.session.commit()
     return user
 
 
@@ -19,6 +35,9 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
+    verified = db.Column(db.Boolean, nullable=False)
+    verified_on = db.Column(db.DateTime, nullable=True)
+    verification_code = db.Column(db.String(255), nullable=False)
 
     def __init__(self, email=None, password=None):
         self.email = email
@@ -26,6 +45,13 @@ class User(db.Model):
             password, current_app.config.get('BCRYPT_LOG_ROUNDS')
         ).decode()
         self.registered_on = datetime.datetime.now()
+        self.verified = False
+        self.verified_on = None
+        vcode = str(uuid.uuid4())
+        current_app.logger.debug("Verification code for User {}: {}".format(self.email, vcode))
+        self.verification_code = bcrypt.generate_password_hash(
+            vcode, current_app.config.get('BCRYPT_LOG_ROUNDS')
+        ).decode()
 
     @classmethod
     def authenticate(cls, **kwargs):
@@ -34,6 +60,14 @@ class User(db.Model):
         if not email or not password:
             return None
         return authenticate(cls, email, password)
+
+    @classmethod
+    def verify(cls, **kwargs):
+        email = kwargs.get('email')
+        vcode = kwargs.get('vcode')
+        if not email or not vcode:
+            return None
+        return verify(cls, email, vcode)
 
     def to_dict(self):
         return dict(id=self.id, email=self.email)

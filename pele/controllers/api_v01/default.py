@@ -47,7 +47,41 @@ class Register(Resource):
                      'message': "Registration failed. Please contact support." }, 500
         user_dict = user.to_dict()
         user_dict['success'] = True
+        user_dict['message'] = "Verification email sent. Verify before using the API."
         return user_dict, 201
+
+
+@api.route('/verify', endpoint='verify')
+@api.doc(responses={ 200: "Success",
+                     400: "Invalid parameters",
+                     401: "Unathorized",
+                     500: "Verification failed" },
+         description="Verify registered account.")
+class Verify(Resource):
+    """Verify."""
+
+    parser = api.parser()
+    parser.add_argument('email', required=True, type=inputs.email(),
+                        help='email address', location='form')
+    parser.add_argument('vcode', required=True, type=str, 
+                        help='verification code', location='form')
+
+    model = api.model('Verify', {
+        'success': fields.Boolean(description="success flag"),
+        'message': fields.String(description="message"),
+    })
+
+    decorators = [limiter.limit("3/minute")]
+
+    @api.marshal_with(model)
+    @api.doc(parser=parser)
+    def post(self):
+        data = self.parser.parse_args()
+        user = User.verify(**data)
+        if not user:
+            return { 'message': 'Invalid verification code' }, 401
+        return { 'success': True,
+                 'message': 'Mahalo for verifying. You may now login to receive an API token.' }
 
 
 @api.route('/login', endpoint='login')
@@ -65,7 +99,7 @@ class Login(Resource):
         'token': fields.String(description="API token"),
     })
 
-    decorators = [limiter.limit("1/minute")]
+    decorators = [limiter.limit("3/minute")]
 
     @auth.login_required
     @api.marshal_with(model)
