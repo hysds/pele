@@ -8,7 +8,7 @@ from pele.extensions import auth
 def authenticate(cls, email, password):
     """Authenticate and return user."""
 
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(email=email.lower()).first()
     if not user or not bcrypt.check_password_hash(user.password, password):
         return None
     if not user.verified:
@@ -20,7 +20,7 @@ def authenticate(cls, email, password):
 def verify(cls, email, verification_code):
     """Verify email address."""
 
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(email=email.lower()).first()
     if not user or not bcrypt.check_password_hash(user.verification_code,
                                                   verification_code):
         return None
@@ -41,7 +41,7 @@ class User(db.Model):
     verification_code = db.Column(db.String(255), nullable=False)
 
     def __init__(self, email=None, password=None, verification_code=None):
-        self.email = email
+        self.email = email.lower()
         self.password = bcrypt.generate_password_hash(
             password, current_app.config.get('BCRYPT_LOG_ROUNDS')
         ).decode()
@@ -54,7 +54,7 @@ class User(db.Model):
 
     @classmethod
     def authenticate(cls, **kwargs):
-        email = kwargs.get('email')
+        email = kwargs.get('email').lower()
         password = kwargs.get('password')
         if not email or not password:
             return None
@@ -62,7 +62,7 @@ class User(db.Model):
 
     @classmethod
     def verify(cls, **kwargs):
-        email = kwargs.get('email')
+        email = kwargs.get('email').lower()
         verification_code = kwargs.get('verification_code')
         if not email or not verification_code:
             return None
