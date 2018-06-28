@@ -95,6 +95,35 @@ class QueryES():
         resp = s.execute()
         return [i['key'] for i in resp.aggregations.to_dict()['datasets']['buckets']]
 
+    def query_types_by_dataset(self, dataset):
+        """Return list of types by dataset:
+    
+        {
+          "query": {
+            "term": {
+              "dataset.raw": "area_of_interest"
+            }
+          }, 
+          "aggs": {
+            "datasets": {
+              "terms": {
+                "field": "dataset_type.raw", 
+                "size": 0
+              }
+            }
+          }, 
+          "size": 0
+        }
+        """
+    
+        s = Search(using=self.client, index=self.es_index).extra(size=0)
+        q = Q('term', dataset__raw=dataset)
+        a = A('terms', field='dataset_type.raw', size=0)
+        s = s.query(q)
+        s.aggs.bucket('types', a)
+        resp = s.execute()
+        return [i['key'] for i in resp.aggregations.to_dict()['types']['buckets']]
+
     def query_granules_by_dataset(self, dataset):
         """Return list of granules by dataset:
     

@@ -90,6 +90,35 @@ class DatasetsByType(Resource):
                  'datasets': datasets }
 
 
+@pele_ns.route('/dataset/<string:dataset>/type', endpoint='types_by_dataset')
+@pele_ns.param('dataset', 'dataset')
+@api.doc(responses={ 200: "Success",
+                     400: "Invalid parameters",
+                     401: "Unathorized",
+                     500: "Execution failed" },
+         description="Get all types by dataset/collection.")
+class TypesByDataset(Resource):
+    """Types by dataset/collection."""
+
+    model = api.model('TypesByDataset', {
+        'success': fields.Boolean(description="success flag"),
+        'message': fields.String(description="message"),
+        'types': fields.List(fields.String, description="types"),
+    })
+
+    decorators = [limiter.limit("1/second")]
+
+    @token_required
+    @api.marshal_with(model)
+    @api.doc(security='apikey')
+    def get(self, dataset):
+        
+        types = QueryES(current_app.config['ES_URL'], 
+                        current_app.config['ES_INDEX']).query_types_by_dataset(dataset)
+        return { 'success': True,
+                 'types': types }
+
+
 @pele_ns.route('/dataset/<string:dataset>/granules', endpoint='granules_by_dataset')
 @pele_ns.param('dataset', 'dataset')
 @api.doc(responses={ 200: "Success",
