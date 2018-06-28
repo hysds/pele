@@ -38,6 +38,7 @@ class QueryES():
         s = Search(using=self.client, index=self.es_index).extra(size=0)
         a = A('terms', field='dataset.raw', size=0)
         s.aggs.bucket('datasets', a)
+        current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         resp = s.execute()
         return [i['key'] for i in resp.aggregations.to_dict()['datasets']['buckets']]
 
@@ -63,6 +64,7 @@ class QueryES():
         s = Search(using=self.client, index=self.es_index).extra(size=0)
         a = A('terms', field='dataset_type.raw', size=0)
         s.aggs.bucket('types', a)
+        current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         resp = s.execute()
         return [i['key'] for i in resp.aggregations.to_dict()['types']['buckets']]
 
@@ -92,6 +94,7 @@ class QueryES():
         a = A('terms', field='dataset.raw', size=0)
         s = s.query(q)
         s.aggs.bucket('datasets', a)
+        current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         resp = s.execute()
         return [i['key'] for i in resp.aggregations.to_dict()['datasets']['buckets']]
 
@@ -105,7 +108,7 @@ class QueryES():
             }
           }, 
           "aggs": {
-            "datasets": {
+            "types": {
               "terms": {
                 "field": "dataset_type.raw", 
                 "size": 0
@@ -121,11 +124,31 @@ class QueryES():
         a = A('terms', field='dataset_type.raw', size=0)
         s = s.query(q)
         s.aggs.bucket('types', a)
+        current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         resp = s.execute()
         return [i['key'] for i in resp.aggregations.to_dict()['types']['buckets']]
 
-    def query_granules_by_dataset(self, dataset):
-        """Return list of granules by dataset:
+    def query_ids_by_dataset(self, dataset):
+        """Return list of ids by dataset:
+    
+        {
+          "query": {
+            "term": {
+              "dataset.raw": "area_of_interest"
+            }
+          }, 
+          "fields": [
+            "_id"
+          ]
+        }
+        """
+    
+        s = Search(using=self.client, index=self.es_index).query(Q('term', dataset__raw=dataset)).fields(['_id'])
+        current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
+        return [i['_id'] for i in s[:s.count()]]
+
+    def query_ids_by_type(self, dataset_type):
+        """Return list of ids by type:
     
         {
           "query": {
@@ -133,18 +156,12 @@ class QueryES():
               "dataset_type.raw": "area_of_interest"
             }
           }, 
-          "aggs": {
-            "datasets": {
-              "terms": {
-                "field": "dataset.raw", 
-                "size": 0
-              }
-            }
-          }, 
-          "size": 0
+          "fields": [
+            "_id"
+          ]
         }
         """
     
-        s = Search(using=self.client, index=self.es_index).query(Q('term', dataset__raw=dataset)).fields(['_id'])
+        s = Search(using=self.client, index=self.es_index).query(Q('term', dataset_type__raw=dataset_type)).fields(['_id'])
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         return [i['_id'] for i in s[:s.count()]]

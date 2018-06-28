@@ -119,20 +119,20 @@ class TypesByDataset(Resource):
                  'types': types }
 
 
-@pele_ns.route('/dataset/<string:dataset>/granules', endpoint='granules_by_dataset')
+@pele_ns.route('/dataset/<string:dataset>/ids', endpoint='ids_by_dataset')
 @pele_ns.param('dataset', 'dataset')
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all granules by dataset/collection.")
-class GranulesByDataset(Resource):
-    """Granules by dataset."""
+         description="Get all dataset IDs by dataset/collection.")
+class IdsByDataset(Resource):
+    """IDs by dataset."""
 
-    model = api.model('GranulesByDataset', {
+    model = api.model('IdsByDataset', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
-        'granules': fields.List(fields.String, description="granules"),
+        'ids': fields.List(fields.String, description="ids"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -142,7 +142,36 @@ class GranulesByDataset(Resource):
     @api.doc(security='apikey')
     def get(self, dataset):
         
-        granules = QueryES(current_app.config['ES_URL'], 
-                           current_app.config['ES_INDEX']).query_granules_by_dataset(dataset)
+        ids = QueryES(current_app.config['ES_URL'], 
+                      current_app.config['ES_INDEX']).query_ids_by_dataset(dataset)
         return { 'success': True,
-                 'granules': granules }
+                 'ids': ids }
+
+
+@pele_ns.route('/type/<string:dataset_type>/ids', endpoint='ids_by_type')
+@pele_ns.param('dataset_type', 'dataset type')
+@api.doc(responses={ 200: "Success",
+                     400: "Invalid parameters",
+                     401: "Unathorized",
+                     500: "Execution failed" },
+         description="Get all dataset IDs by type.")
+class IdsByType(Resource):
+    """IDs by type."""
+
+    model = api.model('IdsByType', {
+        'success': fields.Boolean(description="success flag"),
+        'message': fields.String(description="message"),
+        'ids': fields.List(fields.String, description="ids"),
+    })
+
+    decorators = [limiter.limit("1/second")]
+
+    @token_required
+    @api.marshal_with(model)
+    @api.doc(security='apikey')
+    def get(self, dataset_type):
+        
+        ids = QueryES(current_app.config['ES_URL'], 
+                      current_app.config['ES_INDEX']).query_ids_by_type(dataset_type)
+        return { 'success': True,
+                 'ids': ids }
