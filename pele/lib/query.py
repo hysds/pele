@@ -38,32 +38,6 @@ class QueryES():
         self.es_index = es_index
         self.client = Elasticsearch(es_url)
 
-    def query_datasets(self, offset, page_size):
-        """Return list of datasets:
-    
-        {
-          "query": {
-            "match_all": {}
-          }, 
-          "aggs": {
-            "datasets": {
-              "terms": {
-                "field": "dataset", 
-                "size": 0
-              }
-            }
-          }, 
-          "size": 0
-        }
-        """
-    
-        s = Search(using=self.client, index=self.es_index).extra(size=0)
-        a = A('terms', field='dataset.raw', size=0)
-        s.aggs.bucket('datasets', a)
-        current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
-        datasets = [i['key'] for i in s.execute().aggregations.to_dict()['datasets']['buckets']]
-        return len(datasets), datasets[offset:offset+page_size]
-
     def query_types(self, offset, page_size):
         """Return list of dataset types:
     
@@ -90,7 +64,33 @@ class QueryES():
         types = [i['key'] for i in s.execute().aggregations.to_dict()['types']['buckets']]
         return len(types), types[offset:offset+page_size]
     
-    def query_datasets_by_type(self, dataset_type):
+    def query_datasets(self, offset, page_size):
+        """Return list of datasets:
+    
+        {
+          "query": {
+            "match_all": {}
+          }, 
+          "aggs": {
+            "datasets": {
+              "terms": {
+                "field": "dataset", 
+                "size": 0
+              }
+            }
+          }, 
+          "size": 0
+        }
+        """
+    
+        s = Search(using=self.client, index=self.es_index).extra(size=0)
+        a = A('terms', field='dataset.raw', size=0)
+        s.aggs.bucket('datasets', a)
+        current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
+        datasets = [i['key'] for i in s.execute().aggregations.to_dict()['datasets']['buckets']]
+        return len(datasets), datasets[offset:offset+page_size]
+
+    def query_datasets_by_type(self, dataset_type, offset, page_size):
         """Return list of datasets by type:
     
         {
@@ -117,10 +117,10 @@ class QueryES():
         s = s.query(q)
         s.aggs.bucket('datasets', a)
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
-        resp = s.execute()
-        return [i['key'] for i in resp.aggregations.to_dict()['datasets']['buckets']]
+        datasets = [i['key'] for i in s.execute().aggregations.to_dict()['datasets']['buckets']]
+        return len(datasets), datasets[offset:offset+page_size]
 
-    def query_types_by_dataset(self, dataset):
+    def query_types_by_dataset(self, dataset, offset, page_size):
         """Return list of types by dataset:
     
         {
@@ -147,10 +147,10 @@ class QueryES():
         s = s.query(q)
         s.aggs.bucket('types', a)
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
-        resp = s.execute()
-        return [i['key'] for i in resp.aggregations.to_dict()['types']['buckets']]
+        types = [i['key'] for i in s.execute().aggregations.to_dict()['types']['buckets']]
+        return len(types), types[offset:offset+page_size]
 
-    def query_ids_by_dataset(self, dataset):
+    def query_ids_by_dataset(self, dataset, offset, page_size):
         """Return list of ids by dataset:
     
         {
@@ -167,9 +167,9 @@ class QueryES():
     
         s = Search(using=self.client, index=self.es_index).query(Q('term', dataset__raw=dataset)).fields(['_id'])
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
-        return [i['_id'] for i in s[:s.count()]]
+        return s.count(), [i['_id'] for i in s[offset:offset+page_size]]
 
-    def query_ids_by_type(self, dataset_type):
+    def query_ids_by_type(self, dataset_type, offset, page_size):
         """Return list of ids by type:
     
         {
@@ -186,7 +186,7 @@ class QueryES():
     
         s = Search(using=self.client, index=self.es_index).query(Q('term', dataset_type__raw=dataset_type)).fields(['_id'])
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
-        return [i['_id'] for i in s[:s.count()]]
+        return s.count(), [i['_id'] for i in s[offset:offset+page_size]]
 
     def query_id(self, id):
         """Return metadata for dataset ID:
