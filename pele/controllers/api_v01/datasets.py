@@ -13,7 +13,7 @@ from pele.controllers.api_v01.model import *
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all dataset types.")
+         description="Get all type names.")
 class Types(Resource):
     """Types."""
 
@@ -42,9 +42,9 @@ class Types(Resource):
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all datasets/collections.")
+         description="Get all dataset names.")
 class Datasets(Resource):
-    """Datasets."""
+    """Dataset names."""
 
     model = api.model('Dataset', {
         'success': fields.Boolean(description="success flag"),
@@ -66,15 +66,15 @@ class Datasets(Resource):
                  'datasets': datasets }
 
 
-@pele_ns.route('/type/<string:dataset_type>/dataset', endpoint='datasets_by_type')
-@pele_ns.param('dataset_type', 'dataset type')
+@pele_ns.route('/type/<string:type_name>/datasets', endpoint='datasets_by_type')
+@pele_ns.param('type_name', 'type name')
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all datasets/collections by dataset type.")
+         description="Get all dataset names by type.")
 class DatasetsByType(Resource):
-    """Datasets/collections by type."""
+    """Dataset names by type."""
 
     model = api.model('DatasetsByType', {
         'success': fields.Boolean(description="success flag"),
@@ -88,24 +88,24 @@ class DatasetsByType(Resource):
     @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
-    def get(self, dataset_type):
+    def get(self, type_name):
         
         datasets = QueryES(current_app.config['ES_URL'], 
-                           current_app.config['ES_INDEX']).query_datasets_by_type(dataset_type)
+                           current_app.config['ES_INDEX']).query_datasets_by_type(type_name)
         return { 'success': True,
                  'total': len(datasets),
                  'datasets': datasets }
 
 
-@pele_ns.route('/dataset/<string:dataset>/type', endpoint='types_by_dataset')
-@pele_ns.param('dataset', 'dataset')
+@pele_ns.route('/dataset/<string:dataset_name>/types', endpoint='types_by_dataset')
+@pele_ns.param('dataset_name', 'dataset name')
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all types by dataset/collection.")
+         description="Get all types by dataset name.")
 class TypesByDataset(Resource):
-    """Types by dataset/collection."""
+    """Types by dataset name."""
 
     model = api.model('TypesByDataset', {
         'success': fields.Boolean(description="success flag"),
@@ -119,24 +119,24 @@ class TypesByDataset(Resource):
     @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
-    def get(self, dataset):
+    def get(self, dataset_name):
         
         types = QueryES(current_app.config['ES_URL'], 
-                        current_app.config['ES_INDEX']).query_types_by_dataset(dataset)
+                        current_app.config['ES_INDEX']).query_types_by_dataset(dataset_name)
         return { 'success': True,
                  'total': len(types),
                  'types': types }
 
 
-@pele_ns.route('/dataset/<string:dataset>/ids', endpoint='ids_by_dataset')
-@pele_ns.param('dataset', 'dataset')
+@pele_ns.route('/dataset/<string:dataset_name>/ids', endpoint='ids_by_dataset')
+@pele_ns.param('dataset_name', 'dataset name')
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all dataset IDs by dataset/collection.")
+         description="Get all dataset IDs by dataset name.")
 class IdsByDataset(Resource):
-    """IDs by dataset."""
+    """IDs by dataset name."""
 
     model = api.model('IdsByDataset', {
         'success': fields.Boolean(description="success flag"),
@@ -150,24 +150,24 @@ class IdsByDataset(Resource):
     @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
-    def get(self, dataset):
+    def get(self, dataset_name):
         
         ids = QueryES(current_app.config['ES_URL'], 
-                      current_app.config['ES_INDEX']).query_ids_by_dataset(dataset)
+                      current_app.config['ES_INDEX']).query_ids_by_dataset(dataset_name)
         return { 'success': True,
                  'total': len(ids),
                  'ids': ids }
 
 
-@pele_ns.route('/type/<string:dataset_type>/ids', endpoint='ids_by_type')
-@pele_ns.param('dataset_type', 'dataset type')
+@pele_ns.route('/type/<string:type_name>/ids', endpoint='ids_by_type')
+@pele_ns.param('type_name', 'type name')
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all dataset IDs by type.")
+         description="Get all dataset IDs by type name.")
 class IdsByType(Resource):
-    """IDs by type."""
+    """IDs by type name."""
 
     model = api.model('IdsByType', {
         'success': fields.Boolean(description="success flag"),
@@ -181,10 +181,10 @@ class IdsByType(Resource):
     @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
-    def get(self, dataset_type):
+    def get(self, type_name):
         
         ids = QueryES(current_app.config['ES_URL'], 
-                      current_app.config['ES_INDEX']).query_ids_by_type(dataset_type)
+                      current_app.config['ES_INDEX']).query_ids_by_type(type_name)
         return { 'success': True,
                  'total': len(ids),
                  'ids': ids }
