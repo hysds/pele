@@ -3,11 +3,22 @@ import os, logging
 from flask import Flask
 from flask_restplus import apidoc
 from webassets.loaders import PythonLoader as PythonAssetsLoader
+from werkzeug.routing import BaseConverter
 
 from pele import assets
 from pele.extensions import ( cache, assets_env, debug_toolbar, 
 login_manager, cors, bcrypt, db, limiter, mail )
 
+
+class ListConverter(BaseConverter):
+    regex = r'.+(?:,.+)*,?'
+
+    def to_python(self, value):
+        return [i.strip() for i in value.split(',')]
+
+    def to_url(self, values):
+        return ','.join(BaseConverter.to_url(value) for value in values)
+    
 
 class ReverseProxied(object):
     '''Wrap the application in this middleware and configure the 
@@ -74,6 +85,9 @@ def create_app(object_name):
     app = Flask(__name__)
     app.config.from_object(object_name)
     app.config.from_pyfile('../settings.cfg') # override
+
+    # register converters
+    app.url_map.converters['list'] = ListConverter
 
     # set debug logging level
     if app.config.get('DEBUG', False):
