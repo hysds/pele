@@ -5,6 +5,7 @@ from pele import limiter
 from pele.controllers import token_required
 from pele.lib.query import QueryES
 from pele.controllers.api_v01.config import api, pele_ns
+from pele.controllers.api_v01.model import *
 
 
 @pele_ns.route('/types', endpoint='types')
@@ -175,3 +176,32 @@ class IdsByType(Resource):
                       current_app.config['ES_INDEX']).query_ids_by_type(dataset_type)
         return { 'success': True,
                  'ids': ids }
+
+
+@pele_ns.route('/dataset/<string:id>', endpoint='dataset_by_id')
+@pele_ns.param('id', 'dataset ID')
+@api.doc(responses={ 200: "Success",
+                     400: "Invalid parameters",
+                     401: "Unathorized",
+                     500: "Execution failed" },
+         description="Get metadata by dataset ID.")
+class MetadataById(Resource):
+    """Get metadata by dataset ID."""
+
+    model = api.model('MetadataById', {
+        'success': fields.Boolean(description="success flag"),
+        'message': fields.String(description="message"),
+        'result': fields.Nested(METADATA_MODEL, allow_null=True, skip_none=True),
+    })
+
+    decorators = [limiter.limit("1/second")]
+
+    @token_required
+    @api.marshal_with(model)
+    @api.doc(security='apikey')
+    def get(self, id):
+        
+        result = QueryES(current_app.config['ES_URL'], 
+                         current_app.config['ES_INDEX']).query_id(id)
+        return { 'success': True,
+                 'result': result }

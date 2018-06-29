@@ -165,3 +165,26 @@ class QueryES():
         s = Search(using=self.client, index=self.es_index).query(Q('term', dataset_type__raw=dataset_type)).fields(['_id'])
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         return [i['_id'] for i in s[:s.count()]]
+
+    def query_id(self, id):
+        """Return metadata for dataset ID:
+    
+        {
+          "query": {
+            "term": {
+              "_id": "AOI_earthquake_test_san_fran"
+            }
+          }, 
+          "fields": [
+            "_id"
+          ]
+        }
+        """
+    
+        s = Search(using=self.client, index=self.es_index).query(Q('term', _id=id))
+        current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
+        resp = s.execute()
+        #current_app.logger.debug(json.dumps(resp.to_dict(), indent=2))
+        #current_app.logger.debug(json.dumps([i.to_dict() for i in s[:s.count()]], indent=2))
+        #return [i.to_dict() for i in s[:s.count()]]
+        return resp[0].to_dict() if s.count() > 0 else None
