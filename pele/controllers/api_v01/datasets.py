@@ -52,6 +52,7 @@ class Types(Resource):
                 'message': str(e),
             }, 500
 
+
 @pele_ns.route('/datasets', endpoint='datasets')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
@@ -80,7 +81,6 @@ class Datasets(Resource):
     @api.doc(security='apikey')
     def get(self):
 
-        page_size, offset = get_page_size_and_offset(request)
         try:
             page_size, offset = get_page_size_and_offset(request)
             total, datasets = QueryES(current_app.config['ES_URL'], 
@@ -100,6 +100,8 @@ class Datasets(Resource):
 
 @pele_ns.route('/type/<string:type_name>/datasets', endpoint='datasets_by_type')
 @pele_ns.param('type_name', 'type name')
+@pele_ns.param('offset', 'offset', type=int)
+@pele_ns.param('page_size', 'page size', type=int)
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
@@ -113,6 +115,9 @@ class DatasetsByType(Resource):
         'message': fields.String(description="message"),
         'datasets': fields.List(fields.String, description="datasets"),
         'total': fields.Integer(description="total"),
+        'count': fields.Integer(description="count"),
+        'page_size': fields.Integer(description="page size"),
+        'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -122,15 +127,29 @@ class DatasetsByType(Resource):
     @api.doc(security='apikey')
     def get(self, type_name):
         
-        datasets = QueryES(current_app.config['ES_URL'], 
-                           current_app.config['ES_INDEX']).query_datasets_by_type(type_name)
-        return { 'success': True,
-                 'total': len(datasets),
-                 'datasets': datasets }
+        try:
+            page_size, offset = get_page_size_and_offset(request)
+            total, datasets = QueryES(current_app.config['ES_URL'], 
+                                      current_app.config['ES_INDEX']).query_datasets_by_type(type_name,
+                                                                                             offset,
+                                                                                             page_size)
+            return { 'success': True,
+                     'total': total,
+                     'count': len(datasets),
+                     'page_size': page_size,
+                     'offset': offset,
+                     'datasets': datasets }
+        except Exception, e:
+            return {
+                'success': False,
+                'message': str(e),
+            }, 500
 
 
 @pele_ns.route('/dataset/<string:dataset_name>/types', endpoint='types_by_dataset')
 @pele_ns.param('dataset_name', 'dataset name')
+@pele_ns.param('offset', 'offset', type=int)
+@pele_ns.param('page_size', 'page size', type=int)
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
@@ -144,6 +163,9 @@ class TypesByDataset(Resource):
         'message': fields.String(description="message"),
         'types': fields.List(fields.String, description="types"),
         'total': fields.Integer(description="total"),
+        'count': fields.Integer(description="count"),
+        'page_size': fields.Integer(description="page size"),
+        'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -153,15 +175,29 @@ class TypesByDataset(Resource):
     @api.doc(security='apikey')
     def get(self, dataset_name):
         
-        types = QueryES(current_app.config['ES_URL'], 
-                        current_app.config['ES_INDEX']).query_types_by_dataset(dataset_name)
-        return { 'success': True,
-                 'total': len(types),
-                 'types': types }
+        try:
+            page_size, offset = get_page_size_and_offset(request)
+            total, types = QueryES(current_app.config['ES_URL'], 
+                            current_app.config['ES_INDEX']).query_types_by_dataset(dataset_name,
+                                                                                   offset,
+                                                                                   page_size)
+            return { 'success': True,
+                     'total': total,
+                     'count': len(types),
+                     'page_size': page_size,
+                     'offset': offset,
+                     'types': types }
+        except Exception, e:
+            return {
+                'success': False,
+                'message': str(e),
+            }, 500
 
 
 @pele_ns.route('/dataset/<string:dataset_name>/ids', endpoint='ids_by_dataset')
 @pele_ns.param('dataset_name', 'dataset name')
+@pele_ns.param('offset', 'offset', type=int)
+@pele_ns.param('page_size', 'page size', type=int)
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
@@ -175,6 +211,9 @@ class IdsByDataset(Resource):
         'message': fields.String(description="message"),
         'ids': fields.List(fields.String, description="ids"),
         'total': fields.Integer(description="total"),
+        'count': fields.Integer(description="count"),
+        'page_size': fields.Integer(description="page size"),
+        'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -184,15 +223,29 @@ class IdsByDataset(Resource):
     @api.doc(security='apikey')
     def get(self, dataset_name):
         
-        ids = QueryES(current_app.config['ES_URL'], 
-                      current_app.config['ES_INDEX']).query_ids_by_dataset(dataset_name)
-        return { 'success': True,
-                 'total': len(ids),
-                 'ids': ids }
+        try:
+            page_size, offset = get_page_size_and_offset(request)
+            total, ids = QueryES(current_app.config['ES_URL'], 
+                                 current_app.config['ES_INDEX']).query_ids_by_dataset(dataset_name, 
+                                                                                      offset,
+                                                                                      page_size)
+            return { 'success': True,
+                     'total': total,
+                     'count': len(ids),
+                     'page_size': page_size,
+                     'offset': offset,
+                     'ids': ids }
+        except Exception, e:
+            return {
+                'success': False,
+                'message': str(e),
+            }, 500
 
 
 @pele_ns.route('/type/<string:type_name>/ids', endpoint='ids_by_type')
 @pele_ns.param('type_name', 'type name')
+@pele_ns.param('offset', 'offset', type=int)
+@pele_ns.param('page_size', 'page size', type=int)
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
@@ -206,6 +259,9 @@ class IdsByType(Resource):
         'message': fields.String(description="message"),
         'ids': fields.List(fields.String, description="ids"),
         'total': fields.Integer(description="total"),
+        'count': fields.Integer(description="count"),
+        'page_size': fields.Integer(description="page size"),
+        'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -215,11 +271,23 @@ class IdsByType(Resource):
     @api.doc(security='apikey')
     def get(self, type_name):
         
-        ids = QueryES(current_app.config['ES_URL'], 
-                      current_app.config['ES_INDEX']).query_ids_by_type(type_name)
-        return { 'success': True,
-                 'total': len(ids),
-                 'ids': ids }
+        try:
+            page_size, offset = get_page_size_and_offset(request)
+            total, ids = QueryES(current_app.config['ES_URL'], 
+                                 current_app.config['ES_INDEX']).query_ids_by_type(type_name, 
+                                                                                   offset,
+                                                                                   page_size)
+            return { 'success': True,
+                     'total': total,
+                     'count': len(ids),
+                     'page_size': page_size,
+                     'offset': offset,
+                     'ids': ids }
+        except Exception, e:
+            return {
+                'success': False,
+                'message': str(e),
+            }, 500
 
 
 @pele_ns.route('/dataset/<string:id>', endpoint='dataset_by_id')
