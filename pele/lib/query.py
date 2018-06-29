@@ -6,6 +6,28 @@ from flask import current_app
 from pele import cache
 
 
+def get_page_size(r):
+    """Return page size."""
+
+    page_size = int(r.form.get('page_size',
+        r.args.get('page_size', current_app.config['DEFAULT_PAGE_SIZE'])))
+    if page_size > current_app.config['MAX_PAGE_SIZE']:
+        raise RuntimeError("Maximum page size is {}.".format(current_app.config['MAX_PAGE_SIZE']))
+    return page_size
+
+
+def get_offset(r):
+    """Return page size."""
+
+    return int(r.form.get('offset', r.args.get('offset', 0)))
+
+
+def get_page_size_and_offset(r):
+    """Return page size and offset."""
+
+    return get_page_size(r), get_offset(r)
+
+
 class QueryES():
     """Class for querying ES backend."""
 
@@ -16,7 +38,7 @@ class QueryES():
         self.es_index = es_index
         self.client = Elasticsearch(es_url)
 
-    def query_datasets(self):
+    def query_datasets(self, offset, page_size):
         """Return list of datasets:
     
         {
@@ -39,10 +61,10 @@ class QueryES():
         a = A('terms', field='dataset.raw', size=0)
         s.aggs.bucket('datasets', a)
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
-        resp = s.execute()
-        return [i['key'] for i in resp.aggregations.to_dict()['datasets']['buckets']]
+        datasets = [i['key'] for i in s.execute().aggregations.to_dict()['datasets']['buckets']]
+        return len(datasets), datasets[offset:offset+page_size]
 
-    def query_types(self):
+    def query_types(self, offset, page_size):
         """Return list of dataset types:
     
         {
@@ -60,14 +82,14 @@ class QueryES():
           "size": 0
         }
         """
-    
+
         s = Search(using=self.client, index=self.es_index).extra(size=0)
         a = A('terms', field='dataset_type.raw', size=0)
         s.aggs.bucket('types', a)
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
-        resp = s.execute()
-        return [i['key'] for i in resp.aggregations.to_dict()['types']['buckets']]
-
+        types = [i['key'] for i in s.execute().aggregations.to_dict()['types']['buckets']]
+        return len(types), types[offset:offset+page_size]
+    
     def query_datasets_by_type(self, dataset_type):
         """Return list of datasets by type:
     
