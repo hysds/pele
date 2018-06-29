@@ -18,7 +18,7 @@ OPS_USER = '{{ OPS_USER }}'
 OPS_PASSWORD_HASH = '{{ OPS_PASSWORD_HASH }}'
 
 # api token expiration time
-TOKEN_EXPIRATION_SECS = 3600
+TOKEN_EXPIRATION_SECS = 86400
 
 # pele template vars
 PELE_TITLE = "REST API for HySDS Datasets"
@@ -40,3 +40,7 @@ RATELIMIT_HEADERS_ENABLED = True
 
 # mail settings
 MAIL_DEFAULT_SENDER = "pele-api@jpl.nasa.gov"
+
+# set default and max page size
+DEFAULT_PAGE_SIZE = 10
+MAX_PAGE_SIZE = 100
