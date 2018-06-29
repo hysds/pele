@@ -21,6 +21,7 @@ class Types(Resource):
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
         'types': fields.List(fields.String, description="types"),
+        'total': fields.Integer(description="total"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -32,6 +33,7 @@ class Types(Resource):
         
         types = QueryES(current_app.config['ES_URL'], current_app.config['ES_INDEX']).query_types()
         return { 'success': True,
+                 'total': len(types),
                  'types': types }
 
 
@@ -48,6 +50,7 @@ class Datasets(Resource):
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
         'datasets': fields.List(fields.String, description="datasets"),
+        'total': fields.Integer(description="total"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -59,6 +62,7 @@ class Datasets(Resource):
         
         datasets = QueryES(current_app.config['ES_URL'], current_app.config['ES_INDEX']).query_datasets()
         return { 'success': True,
+                 'total': len(datasets),
                  'datasets': datasets }
 
 
@@ -76,6 +80,7 @@ class DatasetsByType(Resource):
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
         'datasets': fields.List(fields.String, description="datasets"),
+        'total': fields.Integer(description="total"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -88,6 +93,7 @@ class DatasetsByType(Resource):
         datasets = QueryES(current_app.config['ES_URL'], 
                            current_app.config['ES_INDEX']).query_datasets_by_type(dataset_type)
         return { 'success': True,
+                 'total': len(datasets),
                  'datasets': datasets }
 
 
@@ -105,6 +111,7 @@ class TypesByDataset(Resource):
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
         'types': fields.List(fields.String, description="types"),
+        'total': fields.Integer(description="total"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -117,6 +124,7 @@ class TypesByDataset(Resource):
         types = QueryES(current_app.config['ES_URL'], 
                         current_app.config['ES_INDEX']).query_types_by_dataset(dataset)
         return { 'success': True,
+                 'total': len(types),
                  'types': types }
 
 
@@ -134,6 +142,7 @@ class IdsByDataset(Resource):
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
         'ids': fields.List(fields.String, description="ids"),
+        'total': fields.Integer(description="total"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -146,6 +155,7 @@ class IdsByDataset(Resource):
         ids = QueryES(current_app.config['ES_URL'], 
                       current_app.config['ES_INDEX']).query_ids_by_dataset(dataset)
         return { 'success': True,
+                 'total': len(ids),
                  'ids': ids }
 
 
@@ -163,6 +173,7 @@ class IdsByType(Resource):
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
         'ids': fields.List(fields.String, description="ids"),
+        'total': fields.Integer(description="total"),
     })
 
     decorators = [limiter.limit("1/second")]
@@ -175,6 +186,7 @@ class IdsByType(Resource):
         ids = QueryES(current_app.config['ES_URL'], 
                       current_app.config['ES_INDEX']).query_ids_by_type(dataset_type)
         return { 'success': True,
+                 'total': len(ids),
                  'ids': ids }
 
 
