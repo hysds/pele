@@ -329,9 +329,9 @@ class MetadataById(Resource):
                      400: "Invalid parameters",
                      401: "Unathorized",
                      500: "Execution failed" },
-         description="Get all dataset IDs by type name.")
+         description="Get all dataset results by type name and dataset name.")
 class FieldsByTypeDataset(Resource):
-    """IDs by type name."""
+    """Results by type name and dataset name."""
 
     model = api.model('FieldsByTypeDataset', {
         'success': fields.Boolean(description="success flag"),
@@ -363,6 +363,57 @@ class FieldsByTypeDataset(Resource):
                                                                                        ret_fields,
                                                                                        offset,
                                                                                        page_size)
+            return { 'success': True,
+                     'total': total,
+                     'count': len(docs),
+                     'page_size': page_size,
+                     'offset': offset,
+                     'results': docs }
+        except Exception, e:
+            return {
+                'success': False,
+                'message': str(e),
+            }, 500
+
+
+@pele_ns.route('/overlaps/<string:id>/<list:ret_fields>', endpoint='overlaps_by_id')
+@pele_ns.param('id', 'dataset ID')
+@pele_ns.param('ret_fields', 'comma-separated fields to return')
+@pele_ns.param('offset', 'offset', type=int)
+@pele_ns.param('page_size', 'page size', type=int)
+@api.doc(responses={ 200: "Success",
+                     400: "Invalid parameters",
+                     401: "Unathorized",
+                     500: "Execution failed" },
+         description="Get all dataset results that overlap temporally and spatially with dataset ID.")
+class OverlapsById(Resource):
+    """Get all dataset results that overlap temporally and spatially with dataset ID."""
+
+    model = api.model('OverlapsById', {
+        'success': fields.Boolean(description="success flag"),
+        'message': fields.String(description="message"),
+        #'results': fields.List(fields.Nested(METADATA_MODEL, allow_null=True, skip_none=True)),
+        'results': fields.List(fields.Raw),
+        'total': fields.Integer(description="total"),
+        'count': fields.Integer(description="count"),
+        'page_size': fields.Integer(description="page size"),
+        'offset': fields.Integer(description="starting offset (0 index)"),
+    })
+
+    decorators = [limiter.limit("1/second")]
+
+    @token_required
+    @api.marshal_with(model)
+    @api.doc(security='apikey')
+    def get(self, id, ret_fields):
+        
+        try:
+            page_size, offset = get_page_size_and_offset(request)
+            total, docs = QueryES(current_app.config['ES_URL'], 
+                                  current_app.config['ES_INDEX']).overlaps(id,
+                                                                           ret_fields,
+                                                                           offset,
+                                                                           page_size)
             return { 'success': True,
                      'total': total,
                      'count': len(docs),

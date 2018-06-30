@@ -1,6 +1,6 @@
 import json, requests
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import FacetedSearch, Search, Q, A
+from elasticsearch_dsl import FacetedSearch, Search, Q, A, F
 from flask import current_app
 
 from pele import cache
@@ -249,5 +249,110 @@ class QueryES():
             if q is None: q = Q('term', **{ f: val })
             else: q += Q('term', **{ f: val })
         s = Search(using=self.client, index=self.es_index).query(q).partial_fields(partial={'include': fields})
+        current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
+        return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]
+
+    def overlaps(self, id, fields, offset, page_size):
+        """Return list of documents that overlap temporally and spatially:
+
+        {
+          "query": {
+            "filtered": {
+              "filter": {
+                "geo_shape": {
+                  "location": {
+                    "shape": {
+                      "type": "polygon", 
+                      "coordinates": [
+                        [
+                          [
+                            123.234154, 
+                            -33.344517
+                          ], 
+                          [
+                            120.578377, 
+                            -32.708748
+                          ], 
+                          [
+                            121.122925, 
+                            -31.111742
+                          ], 
+                          [
+                            123.731133, 
+                            -31.73547
+                          ], 
+                          [
+                            123.234154, 
+                            -33.344517
+                          ]
+                        ]
+                      ]
+                    }
+                  }
+                }
+              }, 
+              "query": {
+                "bool": {
+                  "must": [
+                    {
+                      "range": {
+                        "endtime": {
+                          "gt": "2017-04-18T21:09:23.789"
+                        }
+                      }
+                    }, 
+                    {
+                      "range": {
+                        "starttime": {
+                          "lt": "2017-04-18T21:09:50.741"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }, 
+          "partial_fields": {
+            "partial": {
+              "include": [
+                "id"
+              ]
+            }
+          }
+        }
+        """
+    
+        # get document by id
+        doc = self.query_id(id)
+        current_app.logger.debug(json.dumps(doc, indent=2))
+        if doc is None:
+            raise RuntimeError("Failed to find dataset ID: {}".format(id))
+
+        # get spatial and temporal fields
+        starttime = doc.get('starttime', None)
+        endtime = doc.get('endtime', None)
+        location = doc.get('location', None)
+
+        # set temporal query
+        q = None
+        if starttime is not None and endtime is not None:
+            q = Q('range', **{ 'endtime': { 'gt': starttime }}) + \
+                     Q('range', **{ 'starttime': { 'lt': endtime }})
+        elif starttime is not None and endtime is None:
+            q = Q('range', **{ 'endtime': { 'gt': starttime }})
+        elif starttime is None and endtime is not None:
+            q = Q('range', **{ 'starttime': { 'lt': endtime }})
+
+        # set spatial filter
+        f = None
+        if location is not None:
+            f = F('geo_shape', **{ 'location': { 'shape': location }})
+
+        # search
+        s = Search(using=self.client, index=self.es_index)
+        if q is not None: s = s.query(q)
+        if f is not None: s = s.filter(f)
+        s = s.partial_fields(partial={'include': fields})
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]
