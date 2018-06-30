@@ -351,12 +351,15 @@ class FieldsByTypeDataset(Resource):
     @api.doc(security='apikey')
     def get(self, type_name, dataset_name, ret_fields):
         
+        terms = {
+            'dataset_type.raw': type_name, 
+            'dataset.raw': dataset_name,
+        }
         try:
             page_size, offset = get_page_size_and_offset(request)
             total, docs = QueryES(current_app.config['ES_URL'], 
                                   "{}_*_{}".format(current_app.config['ES_INDEX'],
-                                                   dataset_name.lower())).query_fields(type_name, 
-                                                                                       dataset_name,
+                                                   dataset_name.lower())).query_fields(terms,
                                                                                        ret_fields,
                                                                                        offset,
                                                                                        page_size)
