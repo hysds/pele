@@ -211,8 +211,8 @@ class QueryES():
         #return [i.to_dict() for i in s[:s.count()]]
         return resp[0].to_dict() if s.count() > 0 else None
 
-    def query_fields(self, dataset_type, dataset, fields, offset, page_size):
-        """Return list of ids by type:
+    def query_fields(self, terms, fields, offset, page_size):
+        """Return list of documents by term bool query:
     
         {
           "query": {
@@ -243,8 +243,11 @@ class QueryES():
         }
         """
     
-        s = Search(using=self.client, index=self.es_index).query(
-            Q('term', dataset_type__raw=dataset_type) +
-            Q('term', dataset__raw=dataset)).partial_fields(partial={'include': fields})
+        q = None
+        for field, val in terms.items():
+            f = field.lower().replace('.', '__')
+            if q is None: q = Q('term', **{ f: val })
+            else: q += Q('term', **{ f: val })
+        s = Search(using=self.client, index=self.es_index).query(q).partial_fields(partial={'include': fields})
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]
