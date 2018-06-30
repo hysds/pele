@@ -194,7 +194,7 @@ class TypesByDataset(Resource):
             }, 500
 
 
-@pele_ns.route('/dataset/<string:dataset_name>/ids', endpoint='ids_by_dataset')
+@pele_ns.route('/dataset/<string:dataset_name>/dataset_ids', endpoint='ids_by_dataset')
 @pele_ns.param('dataset_name', 'dataset name')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
@@ -209,7 +209,7 @@ class IdsByDataset(Resource):
     model = api.model('IdsByDataset', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
-        'ids': fields.List(fields.String, description="ids"),
+        'dataset_ids': fields.List(fields.String, description="dataset ids"),
         'total': fields.Integer(description="total"),
         'count': fields.Integer(description="count"),
         'page_size': fields.Integer(description="page size"),
@@ -234,7 +234,7 @@ class IdsByDataset(Resource):
                      'count': len(ids),
                      'page_size': page_size,
                      'offset': offset,
-                     'ids': ids }
+                     'dataset_ids': ids }
         except Exception, e:
             return {
                 'success': False,
@@ -242,7 +242,7 @@ class IdsByDataset(Resource):
             }, 500
 
 
-@pele_ns.route('/type/<string:type_name>/ids', endpoint='ids_by_type')
+@pele_ns.route('/type/<string:type_name>/dataset_ids', endpoint='ids_by_type')
 @pele_ns.param('type_name', 'type name')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
@@ -257,7 +257,7 @@ class IdsByType(Resource):
     model = api.model('IdsByType', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
-        'ids': fields.List(fields.String, description="ids"),
+        'dataset_ids': fields.List(fields.String, description="dataset ids"),
         'total': fields.Integer(description="total"),
         'count': fields.Integer(description="count"),
         'page_size': fields.Integer(description="page size"),
@@ -282,7 +282,7 @@ class IdsByType(Resource):
                      'count': len(ids),
                      'page_size': page_size,
                      'offset': offset,
-                     'ids': ids }
+                     'dataset_ids': ids }
         except Exception, e:
             return {
                 'success': False,
@@ -290,8 +290,8 @@ class IdsByType(Resource):
             }, 500
 
 
-@pele_ns.route('/dataset/<string:id>', endpoint='dataset_by_id')
-@pele_ns.param('id', 'dataset ID')
+@pele_ns.route('/dataset/<string:dataset_id>', endpoint='dataset_by_id')
+@pele_ns.param('dataset_id', 'dataset ID')
 @api.doc(responses={ 200: "Success",
                      400: "Invalid parameters",
                      401: "Unathorized",
@@ -311,10 +311,10 @@ class MetadataById(Resource):
     @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
-    def get(self, id):
+    def get(self, dataset_id):
         
         result = QueryES(current_app.config['ES_URL'], 
-                         current_app.config['ES_INDEX']).query_id(id)
+                         current_app.config['ES_INDEX']).query_id(dataset_id)
         return { 'success': True,
                  'result': result }
 
@@ -376,8 +376,8 @@ class FieldsByTypeDataset(Resource):
             }, 500
 
 
-@pele_ns.route('/overlaps/<string:id>/<list:ret_fields>', endpoint='overlaps_by_id')
-@pele_ns.param('id', 'dataset ID')
+@pele_ns.route('/overlaps/<string:dataset_id>/<list:ret_fields>', endpoint='overlaps_by_id')
+@pele_ns.param('dataset_id', 'dataset ID')
 @pele_ns.param('ret_fields', 'comma-separated fields to return')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
@@ -405,12 +405,12 @@ class OverlapsById(Resource):
     @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
-    def get(self, id, ret_fields):
+    def get(self, dataset_id, ret_fields):
         
         try:
             page_size, offset = get_page_size_and_offset(request)
             total, docs = QueryES(current_app.config['ES_URL'], 
-                                  current_app.config['ES_INDEX']).overlaps(id,
+                                  current_app.config['ES_INDEX']).overlaps(dataset_id,
                                                                            {},
                                                                            ret_fields,
                                                                            offset,
@@ -428,8 +428,8 @@ class OverlapsById(Resource):
             }, 500
 
 
-@pele_ns.route('/overlaps/<string:id>/type/<string:type_name>/dataset/<string:dataset_name>/<list:ret_fields>', endpoint='overlaps_by_id_type_dataset')
-@pele_ns.param('id', 'dataset ID')
+@pele_ns.route('/overlaps/<string:dataset_id>/type/<string:type_name>/dataset/<string:dataset_name>/<list:ret_fields>', endpoint='overlaps_by_id_type_dataset')
+@pele_ns.param('dataset_id', 'dataset ID')
 @pele_ns.param('type_name', 'type name')
 @pele_ns.param('dataset_name', 'dataset name')
 @pele_ns.param('ret_fields', 'comma-separated fields to return')
@@ -459,7 +459,7 @@ class OverlapsByIdTypeDataset(Resource):
     @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
-    def get(self, id, type_name, dataset_name, ret_fields):
+    def get(self, dataset_id, type_name, dataset_name, ret_fields):
         
         terms = {
             'dataset_type.raw': type_name, 
@@ -468,7 +468,7 @@ class OverlapsByIdTypeDataset(Resource):
         try:
             page_size, offset = get_page_size_and_offset(request)
             total, docs = QueryES(current_app.config['ES_URL'], 
-                                  current_app.config['ES_INDEX']).overlaps(id,
+                                  current_app.config['ES_INDEX']).overlaps(dataset_id,
                                                                            terms,
                                                                            ret_fields,
                                                                            offset,
