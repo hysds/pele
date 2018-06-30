@@ -252,7 +252,7 @@ class QueryES():
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]
 
-    def overlaps(self, id, fields, offset, page_size):
+    def overlaps(self, id, terms, fields, offset, page_size):
         """Return list of documents that overlap temporally and spatially:
 
         {
@@ -334,6 +334,13 @@ class QueryES():
         endtime = doc.get('endtime', None)
         location = doc.get('location', None)
 
+        # build terms query
+        t = None
+        for field, val in terms.items():
+            f = field.lower().replace('.', '__')
+            if t is None: t = Q('term', **{ f: val })
+            else: t += Q('term', **{ f: val })
+
         # set temporal query
         q = None
         if starttime is not None and endtime is not None:
@@ -351,6 +358,7 @@ class QueryES():
 
         # search
         s = Search(using=self.client, index=self.es_index)
+        if t is not None: s = s.query(t)
         if q is not None: s = s.query(q)
         if f is not None: s = s.filter(f)
         s = s.partial_fields(partial={'include': fields})
