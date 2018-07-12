@@ -29,7 +29,7 @@ class Types(Resource):
         'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -74,7 +74,7 @@ class Datasets(Resource):
         'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -120,7 +120,7 @@ class DatasetsByType(Resource):
         'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -168,7 +168,7 @@ class TypesByDataset(Resource):
         'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -216,7 +216,7 @@ class IdsByDataset(Resource):
         'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -264,7 +264,7 @@ class IdsByType(Resource):
         'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -306,7 +306,7 @@ class MetadataById(Resource):
         'result': fields.Nested(METADATA_MODEL, allow_null=True, skip_none=True),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -344,7 +344,7 @@ class FieldsByTypeDataset(Resource):
         'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -400,7 +400,7 @@ class OverlapsById(Resource):
         'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)
@@ -454,7 +454,7 @@ class OverlapsByIdTypeDataset(Resource):
         'offset': fields.Integer(description="starting offset (0 index)"),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)

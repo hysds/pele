@@ -24,7 +24,7 @@ class Echo(Resource):
         'message': fields.String(description="echo output"),
     })
 
-    decorators = [limiter.limit("1/second")]
+    decorators = [limiter.limit("10/second")]
 
     @token_required
     @api.marshal_with(model)
