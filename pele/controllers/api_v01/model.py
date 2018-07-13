@@ -14,6 +14,12 @@ LOCATION_MODEL = api.model('Location', {
     'coordinates': fields.Raw,
 }) 
  
+IMAGE_MODEL = api.model('Image', { 
+    'small_img': fields.String, 
+    'tooltip': fields.String, 
+    'img': fields.String, 
+}) 
+ 
 METADATA_MODEL = api.model('Metadata', { 
     'browse_urls': fields.List(fields.String(description='browse url')), 
     'urls': fields.List(fields.String(description='url')), 
@@ -30,7 +36,7 @@ METADATA_MODEL = api.model('Metadata', {
     'starttime': fields.String(description='ISO 8601 datetime'),
     'endtime': fields.String(description='ISO 8601 datetime'),
     'temporal_span': fields.Integer,
-    'images': fields.List(fields.String(description='image')), 
+    'images': fields.List(fields.Nested(IMAGE_MODEL, allow_null=True, skip_none=True)),
     'system_version': fields.String, 
     'id': fields.String, 
     'metadata': fields.Raw,
