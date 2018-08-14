@@ -249,6 +249,8 @@ class QueryES():
             if q is None: q = Q('term', **{ f: val })
             else: q += Q('term', **{ f: val })
         s = Search(using=self.client, index=self.es_index).query(q).partial_fields(partial={'include': fields})
+        # sort by starttime in descending order; TODO: expose sort parameters out through API
+        s = s.sort({"starttime" : {"order" : "desc"}})
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]
 
