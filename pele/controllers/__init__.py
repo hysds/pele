@@ -1,3 +1,4 @@
+from builtins import str
 from functools import wraps
 import traceback, jwt
 
@@ -46,7 +47,7 @@ def token_required(f):
         except jwt.InvalidTokenError:
             current_app.logger.debug("jwt.InvalidTokenError: {}".format(traceback.format_exc()))
             return invalid_msg, 401
-        except Exception, e:
+        except Exception as e:
             current_app.logger.debug(traceback.format_exc())
             return { 'message': "Unknown error: {}".format(str(e)),
                      'success': False }, 401

@@ -64,7 +64,7 @@ def create_db():
     """Creates the db tables."""
 
     dbdir = app.config['DB_DIR']
-    if not os.path.isdir(dbdir): os.makedirs(dbdir, 0755)
+    if not os.path.isdir(dbdir): os.makedirs(dbdir, 0o755)
     db.create_all()
 
 

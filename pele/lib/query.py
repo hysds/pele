@@ -1,3 +1,4 @@
+from builtins import object
 import json, requests
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import FacetedSearch, Search, Q, A, F
@@ -28,7 +29,7 @@ def get_page_size_and_offset(r):
     return get_page_size(r), get_offset(r)
 
 
-class QueryES():
+class QueryES(object):
     """Class for querying ES backend."""
 
     client = None
@@ -244,7 +245,7 @@ class QueryES():
         """
     
         q = None
-        for field, val in terms.items():
+        for field, val in list(terms.items()):
             f = field.lower().replace('.', '__')
             if q is None: q = Q('term', **{ f: val })
             else: q += Q('term', **{ f: val })
@@ -338,7 +339,7 @@ class QueryES():
 
         # build terms query
         t = None
-        for field, val in terms.items():
+        for field, val in list(terms.items()):
             f = field.lower().replace('.', '__')
             if t is None: t = Q('term', **{ f: val })
             else: t += Q('term', **{ f: val })

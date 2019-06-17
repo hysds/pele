@@ -1,3 +1,4 @@
+from builtins import object
 import os, logging
 
 from flask import Flask
@@ -108,14 +109,14 @@ def create_app(object_name):
     # Import and register the different asset bundles
     assets_env.init_app(app)
     assets_loader = PythonAssetsLoader(assets)
-    for name, bundle in assets_loader.load_bundles().iteritems():
+    for name, bundle in list(assets_loader.load_bundles().items()):
         assets_env.register(name, bundle)
 
     # register our blueprints
-    from controllers.main import main
+    from .controllers.main import main
     app.register_blueprint(main)
 
-    from controllers.api_v01 import services as api_v01
+    from .controllers.api_v01 import services as api_v01
     app.register_blueprint(api_v01)
 
     app.register_blueprint(apidoc.apidoc)

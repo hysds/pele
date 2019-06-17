@@ -16,7 +16,7 @@ pip install -e .
 
 ## Create DB
 ```
-flask create_db
+flask create-db
 flask db init
 flask db migrate
 ```

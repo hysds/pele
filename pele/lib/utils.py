@@ -1,8 +1,9 @@
 import os, sys, re, json, requests, collections
-from StringIO import StringIO
+from io import StringIO
 from lxml.etree import XMLParser, parse, tostring
 from tempfile import mkstemp
 from subprocess import check_call
+from urllib.request import urlopen
 
 from flask import current_app
 

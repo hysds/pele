@@ -1,7 +1,8 @@
+from builtins import object
 import json, requests, time
 
 
-class PeleRequests():
+class PeleRequests(object):
     def __init__(self, base_url):
         self.session = requests.session()
         self.base_url = base_url 

@@ -4,5 +4,5 @@ from wtforms import validators
 
 
 class LoginForm(Form):
-    username = TextField(u'Username', validators=[validators.required()])
-    password = PasswordField(u'Password', validators=[validators.optional()])
+    username = TextField('Username', validators=[validators.required()])
+    password = PasswordField('Password', validators=[validators.optional()])

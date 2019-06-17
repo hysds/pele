@@ -1,3 +1,4 @@
+from builtins import str
 import traceback, jwt, uuid
 from datetime import datetime, timedelta
 
@@ -43,7 +44,7 @@ class Register(Resource):
         user = User(**data)
         db.session.add(user)
         try: db.session.commit()
-        except Exception, e:
+        except Exception as e:
             current_app.logger.debug(traceback.format_exc())
             return { 'success': False,
                      'message': "Registration failed. Please contact support." }, 500
@@ -120,7 +121,7 @@ class Login(Resource):
             'iat':datetime.utcnow(),
             'exp': datetime.utcnow() + timedelta(seconds=current_app.config['TOKEN_EXPIRATION_SECS'])},
             current_app.config['SECRET_KEY'])
-        except Exception, e:
+        except Exception as e:
             current_app.logger.debug(traceback.format_exc())
             return { 'success': False,
                      'message': "Login failed. Please contact support." }, 500

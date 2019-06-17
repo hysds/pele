@@ -1,3 +1,4 @@
+from builtins import str
 from flask import current_app, request
 from flask_restplus import Resource, fields, inputs
 
@@ -46,7 +47,7 @@ class Types(Resource):
                      'page_size': page_size,
                      'offset': offset,
                      'types': types }
-        except Exception, e:
+        except Exception as e:
             return {
                 'success': False,
                 'message': str(e),
@@ -91,7 +92,7 @@ class Datasets(Resource):
                      'page_size': page_size,
                      'offset': offset,
                      'datasets': datasets }
-        except Exception, e:
+        except Exception as e:
             return {
                 'success': False,
                 'message': str(e),
@@ -139,7 +140,7 @@ class DatasetsByType(Resource):
                      'page_size': page_size,
                      'offset': offset,
                      'datasets': datasets }
-        except Exception, e:
+        except Exception as e:
             return {
                 'success': False,
                 'message': str(e),
@@ -187,7 +188,7 @@ class TypesByDataset(Resource):
                      'page_size': page_size,
                      'offset': offset,
                      'types': types }
-        except Exception, e:
+        except Exception as e:
             return {
                 'success': False,
                 'message': str(e),
@@ -235,7 +236,7 @@ class IdsByDataset(Resource):
                      'page_size': page_size,
                      'offset': offset,
                      'dataset_ids': ids }
-        except Exception, e:
+        except Exception as e:
             return {
                 'success': False,
                 'message': str(e),
@@ -283,7 +284,7 @@ class IdsByType(Resource):
                      'page_size': page_size,
                      'offset': offset,
                      'dataset_ids': ids }
-        except Exception, e:
+        except Exception as e:
             return {
                 'success': False,
                 'message': str(e),
@@ -369,7 +370,7 @@ class FieldsByTypeDataset(Resource):
                      'page_size': page_size,
                      'offset': offset,
                      'results': docs }
-        except Exception, e:
+        except Exception as e:
             return {
                 'success': False,
                 'message': str(e),
@@ -421,7 +422,7 @@ class OverlapsById(Resource):
                      'page_size': page_size,
                      'offset': offset,
                      'results': docs }
-        except Exception, e:
+        except Exception as e:
             return {
                 'success': False,
                 'message': str(e),
@@ -479,7 +480,7 @@ class OverlapsByIdTypeDataset(Resource):
                      'page_size': page_size,
                      'offset': offset,
                      'results': docs }
-        except Exception, e:
+        except Exception as e:
             return {
                 'success': False,
                 'message': str(e),
