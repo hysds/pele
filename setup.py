@@ -42,5 +42,8 @@ setup(
                        'webassets',
                        'lxml',
                        'nodeenv',
+                       # TODO: remove werkzeug pin below after resolution of
+                       # https://github.com/pallets/werkzeug/issues/1714
+                       'werkzeug==0.16.1',
                      ]
 )
