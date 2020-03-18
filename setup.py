@@ -23,7 +23,11 @@ setup(
                        'Flask-Login',
                        'Flask-Mail',
                        'Flask-Migrate',
-                       'Flask-RestPlus',
+                       # TODO: remove installation of master branch after new release of
+                       # flask-restx includes the fix referred to here:
+                       # https://github.com/python-restx/flask-restx/issues/85
+                       #'flask-restx',
+                       'flask-restx @ git+https://git@github.com/python-restx/flask-restx',
                        'Flask-Script',
                        'Flask-SQLAlchemy',
                        'Flask-Testing',
@@ -42,8 +46,5 @@ setup(
                        'webassets',
                        'lxml',
                        'nodeenv',
-                       # TODO: remove werkzeug pin below after resolution of
-                       # https://github.com/pallets/werkzeug/issues/1714
-                       'werkzeug==0.16.1',
                      ]
 )
