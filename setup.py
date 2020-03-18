@@ -42,5 +42,9 @@ setup(
                        'webassets',
                        'lxml',
                        'nodeenv',
+                       # TODO: remove werkzeug pin below after new release of 
+                       # flask-restx includes the fix referred to here:
+                       # https://github.com/python-restx/flask-restx/issues/85
+                       'werkzeug==0.16.1',
                      ]
 )
