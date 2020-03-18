@@ -1,5 +1,5 @@
 from flask import current_app
-from flask_restplus import fields
+from flask_restx import fields
 
 from pele.controllers.api_v01.config import api, pele_ns
 

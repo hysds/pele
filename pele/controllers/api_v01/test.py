@@ -1,5 +1,5 @@
 from flask import request, current_app, g
-from flask_restplus import Resource, fields, inputs
+from flask_restx import Resource, fields, inputs
 
 from pele import limiter
 from pele.controllers import token_required

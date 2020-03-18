@@ -1,6 +1,6 @@
 from builtins import str
 from flask import current_app, request
-from flask_restplus import Resource, fields, inputs
+from flask_restx import Resource, fields, inputs
 
 from pele import limiter
 from pele.controllers import token_required
