@@ -3,7 +3,7 @@ import traceback, jwt, uuid
 from datetime import datetime, timedelta
 
 from flask import current_app, g, url_for
-from flask_restplus import Resource, fields, inputs
+from flask_restx import Resource, fields, inputs
 from flask_mail import Message
 
 from pele import db, cache, limiter, mail

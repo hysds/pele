@@ -2,7 +2,7 @@ from builtins import object
 import os, logging
 
 from flask import Flask
-from flask_restplus import apidoc
+from flask_restx import apidoc
 from webassets.loaders import PythonLoader as PythonAssetsLoader
 from werkzeug.routing import BaseConverter
 
