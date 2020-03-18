@@ -23,7 +23,7 @@ setup(
                        'Flask-Login',
                        'Flask-Mail',
                        'Flask-Migrate',
-                       'Flask-RestPlus',
+                       'Flask-RESTX',
                        'Flask-Script',
                        'Flask-SQLAlchemy',
                        'Flask-Testing',
