@@ -23,11 +23,7 @@ setup(
                        'Flask-Login',
                        'Flask-Mail',
                        'Flask-Migrate',
-                       # TODO: remove installation of master branch after new release of
-                       # flask-restx includes the fix referred to here:
-                       # https://github.com/python-restx/flask-restx/issues/85
-                       #'flask-restx',
-                       'flask-restx @ git+https://git@github.com/python-restx/flask-restx',
+                       'flask-restx>=0.2.0',
                        'Flask-Script',
                        'Flask-SQLAlchemy',
                        'Flask-Testing',
