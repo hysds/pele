@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pele',
-    version='0.0.1',
+    version='1.0.0',
     long_description='REST API for HySDS Datasets',
     packages=find_packages(),
     include_package_data=True,
