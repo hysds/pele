@@ -1,7 +1,7 @@
 from builtins import object
 import json, requests
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import FacetedSearch, Search, Q, A, F
+from elasticsearch_dsl import FacetedSearch, Search, Q, A
 from flask import current_app
 
 from pele import cache
@@ -9,7 +9,6 @@ from pele import cache
 
 def get_page_size(r):
     """Return page size."""
-
     page_size = int(r.form.get('page_size',
         r.args.get('page_size', current_app.config['DEFAULT_PAGE_SIZE'])))
     if page_size > current_app.config['MAX_PAGE_SIZE']:
@@ -19,13 +18,11 @@ def get_page_size(r):
 
 def get_offset(r):
     """Return page size."""
-
     return int(r.form.get('offset', r.args.get('offset', 0)))
 
 
 def get_page_size_and_offset(r):
     """Return page size and offset."""
-
     return get_page_size(r), get_offset(r)
 
 
@@ -41,7 +38,6 @@ class QueryES(object):
 
     def query_types(self, offset, page_size):
         """Return list of dataset types:
-    
         {
           "query": {
             "match_all": {}
@@ -67,7 +63,6 @@ class QueryES(object):
     
     def query_datasets(self, offset, page_size):
         """Return list of datasets:
-    
         {
           "query": {
             "match_all": {}
@@ -93,7 +88,6 @@ class QueryES(object):
 
     def query_datasets_by_type(self, dataset_type, offset, page_size):
         """Return list of datasets by type:
-    
         {
           "query": {
             "term": {
@@ -123,7 +117,6 @@ class QueryES(object):
 
     def query_types_by_dataset(self, dataset, offset, page_size):
         """Return list of types by dataset:
-    
         {
           "query": {
             "term": {
@@ -153,7 +146,6 @@ class QueryES(object):
 
     def query_ids_by_dataset(self, dataset, offset, page_size):
         """Return list of ids by dataset:
-    
         {
           "query": {
             "term": {
@@ -172,7 +164,6 @@ class QueryES(object):
 
     def query_ids_by_type(self, dataset_type, offset, page_size):
         """Return list of ids by type:
-    
         {
           "query": {
             "term": {
@@ -191,7 +182,6 @@ class QueryES(object):
 
     def query_id(self, id):
         """Return metadata for dataset ID:
-    
         {
           "query": {
             "term": {
@@ -214,7 +204,6 @@ class QueryES(object):
 
     def query_fields(self, terms, fields, offset, page_size):
         """Return list of documents by term bool query:
-    
         {
           "query": {
             "bool": {
@@ -247,8 +236,10 @@ class QueryES(object):
         q = None
         for field, val in list(terms.items()):
             f = field.lower().replace('.', '__')
-            if q is None: q = Q('term', **{ f: val })
-            else: q += Q('term', **{ f: val })
+            if q is None:
+                q = Q('term', **{ f: val })
+            else:
+                q += Q('term', **{ f: val })
         s = Search(using=self.client, index=self.es_index).query(q).partial_fields(partial={'include': fields})
         # sort by starttime in descending order; TODO: expose sort parameters out through API
         s = s.sort({"starttime" : {"order" : "desc"}})
@@ -257,7 +248,6 @@ class QueryES(object):
 
     def overlaps(self, id, terms, fields, offset, page_size):
         """Return list of documents that overlap temporally and spatially:
-
         {
           "query": {
             "filtered": {
@@ -341,29 +331,33 @@ class QueryES(object):
         t = None
         for field, val in list(terms.items()):
             f = field.lower().replace('.', '__')
-            if t is None: t = Q('term', **{ f: val })
-            else: t += Q('term', **{ f: val })
+            if t is None:
+                t = Q('term', **{f: val})
+            else:
+                t += Q('term', **{f: val})
 
         # set temporal query
         q = None
         if starttime is not None and endtime is not None:
-            q = Q('range', **{ 'endtime': { 'gt': starttime }}) + \
-                     Q('range', **{ 'starttime': { 'lt': endtime }})
+            q = Q('range', **{'endtime': {'gt': starttime}}) + Q('range', **{'starttime': {'lt': endtime}})
         elif starttime is not None and endtime is None:
-            q = Q('range', **{ 'endtime': { 'gt': starttime }})
+            q = Q('range', **{'endtime': {'gt': starttime}})
         elif starttime is None and endtime is not None:
-            q = Q('range', **{ 'starttime': { 'lt': endtime }})
+            q = Q('range', **{'starttime': {'lt': endtime}})
 
         # set spatial filter
         f = None
         if location is not None:
-            f = F('geo_shape', **{ 'location': { 'shape': location }})
+            f = Q('geo_shape', **{'location': {'shape': location}})
 
         # search
         s = Search(using=self.client, index=self.es_index)
-        if t is not None: s = s.query(t)
-        if q is not None: s = s.query(q)
-        if f is not None: s = s.filter(f)
+        if t is not None:
+            s = s.query(t)
+        if q is not None:
+            s = s.query(q)
+        if f is not None:
+            s = s.filter(f)
         s = s.partial_fields(partial={'include': fields})
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]

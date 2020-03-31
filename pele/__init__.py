@@ -7,8 +7,7 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 from werkzeug.routing import BaseConverter
 
 from pele import assets
-from pele.extensions import ( cache, assets_env, debug_toolbar, 
-login_manager, cors, bcrypt, db, limiter, mail )
+from pele.extensions import (cache, assets_env, debug_toolbar, login_manager, cors, bcrypt, db, limiter, mail)
 
 
 class ListConverter(BaseConverter):
@@ -22,7 +21,7 @@ class ListConverter(BaseConverter):
     
 
 class ReverseProxied(object):
-    '''Wrap the application in this middleware and configure the 
+    """Wrap the application in this middleware and configure the 
     front-end server to add these headers, to let you quietly bind 
     this to a URL other than / and to an HTTP scheme that is 
     different than what is used locally.
@@ -52,7 +51,7 @@ class ReverseProxied(object):
         </Location>
 
     :param app: the WSGI application
-    '''
+    """
     def __init__(self, app):
         self.app = app
 
@@ -122,6 +121,7 @@ def create_app(object_name):
     app.register_blueprint(apidoc.apidoc)
 
     return app
+
 
 if __name__ == '__main__':
     # Import the config for the proper environment using the

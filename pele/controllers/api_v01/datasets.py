@@ -393,7 +393,7 @@ class OverlapsById(Resource):
     model = api.model('OverlapsById', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
-        #'results': fields.List(fields.Nested(METADATA_MODEL, allow_null=True, skip_none=True)),
+        # 'results': fields.List(fields.Nested(METADATA_MODEL, allow_null=True, skip_none=True)),
         'results': fields.List(fields.Raw),
         'total': fields.Integer(description="total"),
         'count': fields.Integer(description="count"),
@@ -407,21 +407,22 @@ class OverlapsById(Resource):
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_id, ret_fields):
-        
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, docs = QueryES(current_app.config['ES_URL'], 
+            total, docs = QueryES(current_app.config['ES_URL'],
                                   current_app.config['ES_INDEX']).overlaps(dataset_id,
                                                                            {},
                                                                            ret_fields,
                                                                            offset,
                                                                            page_size)
-            return { 'success': True,
-                     'total': total,
-                     'count': len(docs),
-                     'page_size': page_size,
-                     'offset': offset,
-                     'results': docs }
+            return {
+                'success': True,
+                'total': total,
+                'count': len(docs),
+                'page_size': page_size,
+                'offset': offset,
+                'results': docs
+            }
         except Exception as e:
             return {
                 'success': False,
