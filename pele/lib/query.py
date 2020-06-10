@@ -1,6 +1,5 @@
 from builtins import object
 import json, requests
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import FacetedSearch, Search, Q, A
 from flask import current_app
 
@@ -31,12 +30,13 @@ class QueryES(object):
 
     client = None
 
-    def __init__(self, es_url, es_index):
-        self.es_url = es_url
-        self.es_index = es_index
-        self.client = Elasticsearch(es_url)
+    def __init__(self, es_client):
+        """
+        :param es_client: the object returned from Elasticsearch(...)
+        """
+        self.client = es_client
 
-    def query_types(self, offset, page_size):
+    def query_types(self, index, offset, page_size):
         """Return list of dataset types:
         {
           "query": {
@@ -54,14 +54,14 @@ class QueryES(object):
         }
         """
 
-        s = Search(using=self.client, index=self.es_index).extra(size=0)
-        a = A('terms', field='dataset_type.raw', size=0)
+        s = Search(using=self.client, index=index).extra(size=0)
+        a = A('terms', field='dataset_type.keyword', size=0)
         s.aggs.bucket('types', a)
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         types = [i['key'] for i in s.execute().aggregations.to_dict()['types']['buckets']]
         return len(types), types[offset:offset+page_size]
     
-    def query_datasets(self, offset, page_size):
+    def query_datasets(self, index, offset, page_size):
         """Return list of datasets:
         {
           "query": {
@@ -79,25 +79,25 @@ class QueryES(object):
         }
         """
     
-        s = Search(using=self.client, index=self.es_index).extra(size=0)
-        a = A('terms', field='dataset.raw', size=0)
+        s = Search(using=self.client, index=index).extra(size=0)
+        a = A('terms', field='dataset.keyword', size=0)
         s.aggs.bucket('datasets', a)
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         datasets = [i['key'] for i in s.execute().aggregations.to_dict()['datasets']['buckets']]
         return len(datasets), datasets[offset:offset+page_size]
 
-    def query_datasets_by_type(self, dataset_type, offset, page_size):
+    def query_datasets_by_type(self, index, dataset_type, offset, page_size):
         """Return list of datasets by type:
         {
           "query": {
             "term": {
-              "dataset_type.raw": "area_of_interest"
+              "dataset_type.keyword": "area_of_interest"
             }
           }, 
           "aggs": {
             "datasets": {
               "terms": {
-                "field": "dataset.raw", 
+                "field": "dataset.keyword",
                 "size": 0
               }
             }
@@ -106,27 +106,27 @@ class QueryES(object):
         }
         """
     
-        s = Search(using=self.client, index=self.es_index).extra(size=0)
+        s = Search(using=self.client, index=index).extra(size=0)
         q = Q('term', dataset_type__raw=dataset_type)
-        a = A('terms', field='dataset.raw', size=0)
+        a = A('terms', field='dataset.keyword', size=0)
         s = s.query(q)
         s.aggs.bucket('datasets', a)
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         datasets = [i['key'] for i in s.execute().aggregations.to_dict()['datasets']['buckets']]
         return len(datasets), datasets[offset:offset+page_size]
 
-    def query_types_by_dataset(self, dataset, offset, page_size):
+    def query_types_by_dataset(self, index, dataset, offset, page_size):
         """Return list of types by dataset:
         {
           "query": {
             "term": {
-              "dataset.raw": "area_of_interest"
+              "dataset.keyword": "area_of_interest"
             }
           }, 
           "aggs": {
             "types": {
               "terms": {
-                "field": "dataset_type.raw", 
+                "field": "dataset_type.keyword",
                 "size": 0
               }
             }
@@ -135,21 +135,21 @@ class QueryES(object):
         }
         """
     
-        s = Search(using=self.client, index=self.es_index).extra(size=0)
+        s = Search(using=self.client, index=index).extra(size=0)
         q = Q('term', dataset__raw=dataset)
-        a = A('terms', field='dataset_type.raw', size=0)
+        a = A('terms', field='dataset_type.keyword', size=0)
         s = s.query(q)
         s.aggs.bucket('types', a)
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         types = [i['key'] for i in s.execute().aggregations.to_dict()['types']['buckets']]
         return len(types), types[offset:offset+page_size]
 
-    def query_ids_by_dataset(self, dataset, offset, page_size):
+    def query_ids_by_dataset(self, index, dataset, offset, page_size):
         """Return list of ids by dataset:
         {
           "query": {
             "term": {
-              "dataset.raw": "area_of_interest"
+              "dataset.keyword": "area_of_interest"
             }
           }, 
           "fields": [
@@ -158,16 +158,16 @@ class QueryES(object):
         }
         """
     
-        s = Search(using=self.client, index=self.es_index).query(Q('term', dataset__raw=dataset)).fields(['_id'])
+        s = Search(using=self.client, index=index).query(Q('term', dataset__raw=dataset)).fields(['_id'])
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         return s.count(), [i['_id'] for i in s[offset:offset+page_size]]
 
-    def query_ids_by_type(self, dataset_type, offset, page_size):
+    def query_ids_by_type(self, index, dataset_type, offset, page_size):
         """Return list of ids by type:
         {
           "query": {
             "term": {
-              "dataset_type.raw": "area_of_interest"
+              "dataset_type.keyword": "area_of_interest"
             }
           }, 
           "fields": [
@@ -176,11 +176,11 @@ class QueryES(object):
         }
         """
     
-        s = Search(using=self.client, index=self.es_index).query(Q('term', dataset_type__raw=dataset_type)).fields(['_id'])
+        s = Search(using=self.client, index=index).query(Q('term', dataset_type__raw=dataset_type)).fields(['_id'])
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         return s.count(), [i['_id'] for i in s[offset:offset+page_size]]
 
-    def query_id(self, id):
+    def query_id(self, index, _id):
         """Return metadata for dataset ID:
         {
           "query": {
@@ -194,15 +194,12 @@ class QueryES(object):
         }
         """
     
-        s = Search(using=self.client, index=self.es_index).query(Q('term', _id=id))
+        s = Search(using=self.client, index=index).query(Q('term', _id=_id))
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         resp = s.execute()
-        #current_app.logger.debug(json.dumps(resp.to_dict(), indent=2))
-        #current_app.logger.debug(json.dumps([i.to_dict() for i in s[:s.count()]], indent=2))
-        #return [i.to_dict() for i in s[:s.count()]]
         return resp[0].to_dict() if s.count() > 0 else None
 
-    def query_fields(self, terms, fields, offset, page_size):
+    def query_fields(self, index, terms, fields, offset, page_size):
         """Return list of documents by term bool query:
         {
           "query": {
@@ -210,12 +207,12 @@ class QueryES(object):
               "must": [
                 { 
                   "term": {
-                    "dataset_type.raw": "acquisition"
+                    "dataset_type.keyword": "acquisition"
                   }
                 },
                 { 
                   "term": {
-                    "dataset.raw": "acquisition-S1-IW_SLC"
+                    "dataset.keyword": "acquisition-S1-IW_SLC"
                   }
                 }
               ]
@@ -240,13 +237,13 @@ class QueryES(object):
                 q = Q('term', **{ f: val })
             else:
                 q += Q('term', **{ f: val })
-        s = Search(using=self.client, index=self.es_index).query(q).partial_fields(partial={'include': fields})
+        s = Search(using=self.client, index=index).query(q).partial_fields(partial={'include': fields})
         # sort by starttime in descending order; TODO: expose sort parameters out through API
         s = s.sort({"starttime" : {"order" : "desc"}})
         current_app.logger.debug(json.dumps(s.to_dict(), indent=2))
         return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]
 
-    def overlaps(self, id, terms, fields, offset, page_size):
+    def overlaps(self, index, _id, terms, fields, offset, page_size):
         """Return list of documents that overlap temporally and spatially:
         {
           "query": {
@@ -317,10 +314,10 @@ class QueryES(object):
         """
     
         # get document by id
-        doc = self.query_id(id)
+        doc = self.query_id(_id)
         current_app.logger.debug(json.dumps(doc, indent=2))
         if doc is None:
-            raise RuntimeError("Failed to find dataset ID: {}".format(id))
+            raise RuntimeError("Failed to find dataset ID: {}".format(_id))
 
         # get spatial and temporal fields
         starttime = doc.get('starttime', None)
@@ -351,7 +348,7 @@ class QueryES(object):
             f = Q('geo_shape', **{'location': {'shape': location}})
 
         # search
-        s = Search(using=self.client, index=self.es_index)
+        s = Search(using=self.client, index=index)
         if t is not None:
             s = s.query(t)
         if q is not None:

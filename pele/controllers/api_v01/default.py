@@ -12,11 +12,10 @@ from pele.models.user import User
 from pele.controllers.api_v01.config import api
 
 
-
 @api.route('/register', endpoint='register')
-@api.doc(responses={ 201: "Success",
-                     400: "Invalid parameters",
-                     500: "Registration failed" },
+@api.doc(responses={201: "Success",
+                    400: "Invalid parameters",
+                    500: "Registration failed"},
          description="User registration.")
 class Register(Resource):
     """Register."""
@@ -43,11 +42,14 @@ class Register(Resource):
         data['verification_code'] = str(uuid.uuid4())
         user = User(**data)
         db.session.add(user)
-        try: db.session.commit()
+        try:
+            db.session.commit()
         except Exception as e:
             current_app.logger.debug(traceback.format_exc())
-            return { 'success': False,
-                     'message': "Registration failed. Please contact support." }, 500
+            return {
+                'success': False,
+                'message': "Registration failed. Please contact support."
+            }, 500
         msg = Message("Verify your Pele API account", recipients=[user.email])
         msg.body = "Use your verification code below to verify your Pele API " + \
                    "account at {}:\n\n{}".format(url_for('api_v0-1.doc', _external=True),
@@ -60,10 +62,10 @@ class Register(Resource):
 
 
 @api.route('/verify', endpoint='verify')
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Verification failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Verification failed"},
          description="Verify registered account.")
 class Verify(Resource):
     """Verify."""
@@ -87,16 +89,18 @@ class Verify(Resource):
         data = self.parser.parse_args()
         user = User.verify(**data)
         if not user:
-            return { 'message': 'Invalid verification code' }, 401
-        return { 'success': True,
-                 'message': 'Mahalo for verifying. You may now login to receive an API token.' }
+            return {'message': 'Invalid verification code'}, 401
+        return {
+            'success': True,
+            'message': 'Mahalo for verifying. You may now login to receive an API token.'
+        }
 
 
 @api.route('/login', endpoint='login')
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Login failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Login failed"},
          description="Login and receive API token.")
 class Login(Resource):
     """Login."""
@@ -114,16 +118,23 @@ class Login(Resource):
     def post(self):
         user = g.user
         if not user:
-            return { 'message': 'Invalid credentials' }, 401
+            return {
+                'message': 'Invalid credentials'
+            }, 401
 
-        try: token = jwt.encode({
-            'sub': user.email,
-            'iat':datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(seconds=current_app.config['TOKEN_EXPIRATION_SECS'])},
-            current_app.config['SECRET_KEY'])
+        try:
+            token = jwt.encode({
+                'sub': user.email,
+                'iat':datetime.utcnow(),
+                'exp': datetime.utcnow() + timedelta(seconds=current_app.config['TOKEN_EXPIRATION_SECS'])},
+                current_app.config['SECRET_KEY'])
         except Exception as e:
             current_app.logger.debug(traceback.format_exc())
-            return { 'success': False,
-                     'message': "Login failed. Please contact support." }, 500
-        return { 'success': True,
-                 'token': token.decode('UTF-8') }
+            return {
+                'success': False,
+                'message': "Login failed. Please contact support."
+            }, 500
+        return {
+            'success': True,
+            'token': token.decode('UTF-8')
+        }

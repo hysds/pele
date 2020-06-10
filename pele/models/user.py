@@ -77,6 +77,7 @@ def verify_password(email, password):
     """Return True if user is verified False otherwise."""
 
     user = authenticate(User, email, password)
-    if user is None: return False
+    if user is None:
+        return False
     g.user = user
     return True

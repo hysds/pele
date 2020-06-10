@@ -4,18 +4,23 @@ from flask_restx import Resource, fields, inputs
 
 from pele import limiter
 from pele.controllers import token_required
+from pele.lib.es_connection import get_es_client
 from pele.lib.query import QueryES, get_page_size_and_offset
 from pele.controllers.api_v01.config import api, pele_ns
 from pele.controllers.api_v01.model import *
+
+ES_INDEX = current_app.config['ES_INDEX']
+es_client = get_es_client()
+es_util = QueryES(es_client)
 
 
 @pele_ns.route('/types', endpoint='types')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Execution failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Execution failed"},
          description="Get all type names.")
 class Types(Resource):
     """Types."""
@@ -39,14 +44,15 @@ class Types(Resource):
         
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, types = QueryES(current_app.config['ES_URL'], 
-                current_app.config['ES_INDEX']).query_types(offset, page_size)
-            return { 'success': True,
-                     'total': total,
-                     'count': len(types),
-                     'page_size': page_size,
-                     'offset': offset,
-                     'types': types }
+            total, types = es_util.query_types(ES_INDEX, offset, page_size)
+            return {
+                'success': True,
+                'total': total,
+                'count': len(types),
+                'page_size': page_size,
+                'offset': offset,
+                'types': types
+            }
         except Exception as e:
             return {
                 'success': False,
@@ -57,10 +63,10 @@ class Types(Resource):
 @pele_ns.route('/datasets', endpoint='datasets')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Execution failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Execution failed"},
          description="Get all dataset names.")
 class Datasets(Resource):
     """Dataset names."""
@@ -84,14 +90,15 @@ class Datasets(Resource):
 
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, datasets = QueryES(current_app.config['ES_URL'], 
-                current_app.config['ES_INDEX']).query_datasets(offset, page_size)
-            return { 'success': True,
-                     'total': total,
-                     'count': len(datasets),
-                     'page_size': page_size,
-                     'offset': offset,
-                     'datasets': datasets }
+            total, datasets = es_util.query_datasets(ES_INDEX, offset, page_size)
+            return {
+                'success': True,
+                'total': total,
+                'count': len(datasets),
+                'page_size': page_size,
+                'offset': offset,
+                'datasets': datasets
+            }
         except Exception as e:
             return {
                 'success': False,
@@ -103,10 +110,10 @@ class Datasets(Resource):
 @pele_ns.param('type_name', 'type name')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Execution failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Execution failed"},
          description="Get all dataset names by type.")
 class DatasetsByType(Resource):
     """Dataset names by type."""
@@ -130,16 +137,15 @@ class DatasetsByType(Resource):
         
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, datasets = QueryES(current_app.config['ES_URL'], 
-                                      current_app.config['ES_INDEX']).query_datasets_by_type(type_name,
-                                                                                             offset,
-                                                                                             page_size)
-            return { 'success': True,
-                     'total': total,
-                     'count': len(datasets),
-                     'page_size': page_size,
-                     'offset': offset,
-                     'datasets': datasets }
+            total, datasets = es_util.query_datasets_by_type(ES_INDEX, type_name, offset, page_size)
+            return {
+                'success': True,
+                'total': total,
+                'count': len(datasets),
+                'page_size': page_size,
+                'offset': offset,
+                'datasets': datasets
+            }
         except Exception as e:
             return {
                 'success': False,
@@ -151,10 +157,10 @@ class DatasetsByType(Resource):
 @pele_ns.param('dataset_name', 'dataset name')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Execution failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Execution failed" },
          description="Get all types by dataset name.")
 class TypesByDataset(Resource):
     """Types by dataset name."""
@@ -178,16 +184,15 @@ class TypesByDataset(Resource):
         
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, types = QueryES(current_app.config['ES_URL'], 
-                            current_app.config['ES_INDEX']).query_types_by_dataset(dataset_name,
-                                                                                   offset,
-                                                                                   page_size)
-            return { 'success': True,
-                     'total': total,
-                     'count': len(types),
-                     'page_size': page_size,
-                     'offset': offset,
-                     'types': types }
+            total, types = es_util.query_types_by_dataset(ES_INDEX, dataset_name, offset, page_size)
+            return {
+                'success': True,
+                'total': total,
+                'count': len(types),
+                'page_size': page_size,
+                'offset': offset,
+                'types': types
+            }
         except Exception as e:
             return {
                 'success': False,
@@ -226,16 +231,15 @@ class IdsByDataset(Resource):
         
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, ids = QueryES(current_app.config['ES_URL'], 
-                                 current_app.config['ES_INDEX']).query_ids_by_dataset(dataset_name, 
-                                                                                      offset,
-                                                                                      page_size)
-            return { 'success': True,
-                     'total': total,
-                     'count': len(ids),
-                     'page_size': page_size,
-                     'offset': offset,
-                     'dataset_ids': ids }
+            total, ids = es_util.query_ids_by_dataset(ES_INDEX, dataset_name, offset, page_size)
+            return {
+                'success': True,
+                'total': total,
+                'count': len(ids),
+                'page_size': page_size,
+                'offset': offset,
+                'dataset_ids': ids
+            }
         except Exception as e:
             return {
                 'success': False,
@@ -271,19 +275,17 @@ class IdsByType(Resource):
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, type_name):
-        
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, ids = QueryES(current_app.config['ES_URL'], 
-                                 current_app.config['ES_INDEX']).query_ids_by_type(type_name, 
-                                                                                   offset,
-                                                                                   page_size)
-            return { 'success': True,
-                     'total': total,
-                     'count': len(ids),
-                     'page_size': page_size,
-                     'offset': offset,
-                     'dataset_ids': ids }
+            total, ids = es_util.query_ids_by_type(ES_INDEX, type_name, offset, page_size)
+            return {
+                'success': True,
+                'total': total,
+                'count': len(ids),
+                'page_size': page_size,
+                'offset': offset,
+                'dataset_ids': ids
+            }
         except Exception as e:
             return {
                 'success': False,
@@ -314,10 +316,11 @@ class MetadataById(Resource):
     @api.doc(security='apikey')
     def get(self, dataset_id):
         
-        result = QueryES(current_app.config['ES_URL'], 
-                         current_app.config['ES_INDEX']).query_id(dataset_id)
-        return { 'success': True,
-                 'result': result }
+        result = es_util.query_id(ES_INDEX, dataset_id)
+        return {
+            'success': True,
+            'result': result
+        }
 
 
 @pele_ns.route('/type/<string:type_name>/dataset/<string:dataset_name>/<list:ret_fields>', endpoint='fields_by_type_and_dataset')
@@ -337,7 +340,6 @@ class FieldsByTypeDataset(Resource):
     model = api.model('FieldsByTypeDataset', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
-        #'results': fields.List(fields.Nested(METADATA_MODEL, allow_null=True, skip_none=True)),
         'results': fields.List(fields.Raw),
         'total': fields.Integer(description="total"),
         'count': fields.Integer(description="count"),
@@ -351,25 +353,22 @@ class FieldsByTypeDataset(Resource):
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, type_name, dataset_name, ret_fields):
-        
         terms = {
-            'dataset_type.raw': type_name, 
-            'dataset.raw': dataset_name,
+            'dataset_type.keyword': type_name,
+            'dataset.keyword': dataset_name,
         }
         try:
+            index = "{}_*_{}".format(ES_INDEX, dataset_name.lower())
             page_size, offset = get_page_size_and_offset(request)
-            total, docs = QueryES(current_app.config['ES_URL'], 
-                                  "{}_*_{}".format(current_app.config['ES_INDEX'],
-                                                   dataset_name.lower())).query_fields(terms,
-                                                                                       ret_fields,
-                                                                                       offset,
-                                                                                       page_size)
-            return { 'success': True,
-                     'total': total,
-                     'count': len(docs),
-                     'page_size': page_size,
-                     'offset': offset,
-                     'results': docs }
+            total, docs = es_util.query_fields(index, terms, ret_fields, offset, page_size)
+            return {
+                'success': True,
+                'total': total,
+                'count': len(docs),
+                'page_size': page_size,
+                'offset': offset,
+                'results': docs
+            }
         except Exception as e:
             return {
                 'success': False,
@@ -393,7 +392,6 @@ class OverlapsById(Resource):
     model = api.model('OverlapsById', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
-        # 'results': fields.List(fields.Nested(METADATA_MODEL, allow_null=True, skip_none=True)),
         'results': fields.List(fields.Raw),
         'total': fields.Integer(description="total"),
         'count': fields.Integer(description="count"),
@@ -409,12 +407,7 @@ class OverlapsById(Resource):
     def get(self, dataset_id, ret_fields):
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, docs = QueryES(current_app.config['ES_URL'],
-                                  current_app.config['ES_INDEX']).overlaps(dataset_id,
-                                                                           {},
-                                                                           ret_fields,
-                                                                           offset,
-                                                                           page_size)
+            total, docs = es_util.overlaps(ES_INDEX, dataset_id, {}, ret_fields, offset, page_size)
             return {
                 'success': True,
                 'total': total,
@@ -430,25 +423,26 @@ class OverlapsById(Resource):
             }, 500
 
 
-@pele_ns.route('/overlaps/<string:dataset_id>/type/<string:type_name>/dataset/<string:dataset_name>/<list:ret_fields>', endpoint='overlaps_by_id_type_dataset')
+@pele_ns.route('/overlaps/<string:dataset_id>/type/<string:type_name>/dataset/<string:dataset_name>/<list:ret_fields>',
+               endpoint='overlaps_by_id_type_dataset')
 @pele_ns.param('dataset_id', 'dataset ID')
 @pele_ns.param('type_name', 'type name')
 @pele_ns.param('dataset_name', 'dataset name')
 @pele_ns.param('ret_fields', 'comma-separated fields to return')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Execution failed" },
-         description="Get all results that overlap temporally and spatially with dataset ID of a certain type and dataset.")
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Execution failed"},
+         description="Get all results that overlap temporally and spatially with dataset ID of a certain type and "
+                     "dataset.")
 class OverlapsByIdTypeDataset(Resource):
     """Get all dataset results that overlap temporally and spatially with dataset ID of a certain type and dataset."""
 
     model = api.model('OverlapsByIdTypeDataset', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
-        #'results': fields.List(fields.Nested(METADATA_MODEL, allow_null=True, skip_none=True)),
         'results': fields.List(fields.Raw),
         'total': fields.Integer(description="total"),
         'count': fields.Integer(description="count"),
@@ -464,23 +458,20 @@ class OverlapsByIdTypeDataset(Resource):
     def get(self, dataset_id, type_name, dataset_name, ret_fields):
         
         terms = {
-            'dataset_type.raw': type_name, 
-            'dataset.raw': dataset_name,
+            'dataset_type.keyword': type_name,
+            'dataset.keyword': dataset_name,
         }
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, docs = QueryES(current_app.config['ES_URL'], 
-                                  current_app.config['ES_INDEX']).overlaps(dataset_id,
-                                                                           terms,
-                                                                           ret_fields,
-                                                                           offset,
-                                                                           page_size)
-            return { 'success': True,
-                     'total': total,
-                     'count': len(docs),
-                     'page_size': page_size,
-                     'offset': offset,
-                     'results': docs }
+            total, docs = es_util.overlaps(ES_INDEX, dataset_id, terms, ret_fields, offset, page_size)
+            return {
+                'success': True,
+                'total': total,
+                'count': len(docs),
+                'page_size': page_size,
+                'offset': offset,
+                'results': docs
+            }
         except Exception as e:
             return {
                 'success': False,
