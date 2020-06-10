@@ -3,11 +3,11 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 
 
-AWS_ES = current_app.config.get('AWS_ES', False)
-AWS_REGION = current_app.config.get('AWS_REGION')
+AWS_ES = current_app.config['AWS_ES']
+AWS_REGION = current_app.config['AWS_REGION']
 
-ES_HOST = current_app.config.get('ES_HOST')
-ES_URL = current_app.config.get('ES_URL')
+ES_HOST = current_app.config['ES_HOST']
+ES_URL = current_app.config['ES_URL']
 
 ES_CLIENT = None
 
