@@ -1,12 +1,11 @@
 from builtins import str
 from flask import current_app, request
-from flask_restx import Resource, fields, inputs
+from flask_restx import Resource, fields
 
 from pele import limiter
 from pele.controllers import token_required
 from pele.lib.es_connection import get_es_client
 from pele.lib.query import QueryES, get_page_size_and_offset
-from pele.controllers.api_v01.config import api, pele_ns
 from pele.controllers.api_v01.model import *
 
 ES_INDEX = current_app.config['ES_INDEX']

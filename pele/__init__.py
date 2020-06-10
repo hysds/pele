@@ -84,7 +84,7 @@ def create_app(object_name):
 
     app = Flask(__name__)
     app.config.from_object(object_name)
-    app.config.from_pyfile('../settings.cfg') # override
+    app.config.from_pyfile('../settings.cfg')  # override
 
     # register converters
     app.url_map.converters['list'] = ListConverter
