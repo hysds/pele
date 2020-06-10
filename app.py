@@ -1,8 +1,7 @@
 import os, sys, click, unittest, coverage
 from flask_migrate import Migrate, MigrateCommand
 
-from pele import create_app, db
-
+from pele import app, db
 
 COV = coverage.coverage(
     branch=True,
@@ -14,11 +13,8 @@ COV = coverage.coverage(
 )
 COV.start()
 
-
-env = os.environ.get('FLASK_ENV', 'development')
-app = create_app('pele.settings.%sConfig' % env.capitalize())
-
-
+# env = os.environ.get('FLASK_ENV', 'development')
+# app = create_app('pele.settings.%sConfig' % env.capitalize())
 migrate = Migrate(app, db)
 
 

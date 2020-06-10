@@ -1,4 +1,5 @@
-from flask import current_app
+# from flask import current_app
+from pele import app
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 
@@ -9,11 +10,11 @@ ES_CLIENT = None
 def get_es_client():
     global ES_CLIENT
 
-    aws_es = current_app.config['AWS_ES']
-    aws_region = current_app.config['AWS_REGION']
+    aws_es = app.config.get('AWS_ES', False)
+    aws_region = app.config.get('AWS_REGION')
 
-    es_host = current_app.config['ES_HOST']
-    es_url = current_app.config['ES_URL']
+    es_host = app.config.get('ES_HOST', '127.0.0.1')
+    es_url = app.config.get('ES_URL', 'http://127.0.0.1:9200')
 
     if ES_CLIENT is None:
         if aws_es is True:

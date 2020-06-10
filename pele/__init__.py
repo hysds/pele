@@ -72,61 +72,64 @@ class ReverseProxied(object):
         return self.app(environ, start_response)
 
 
-def create_app(object_name):
-    """
-    An flask application factory, as explained here:
-    http://flask.pocoo.org/docs/patterns/appfactories/
+# def create_app(object_name):
+"""
+An flask application factory, as explained here:
+http://flask.pocoo.org/docs/patterns/appfactories/
 
-    Arguments:
-        object_name: the python path of the config object,
-                     e.g. pele.settings.ProductionConfig
-    """
+Arguments:
+    object_name: the python path of the config object,
+                 e.g. pele.settings.ProductionConfig
+"""
 
-    app = Flask(__name__)
-    app.config.from_object(object_name)
-    app.config.from_pyfile('../settings.cfg')  # override
+env = os.environ.get('FLASK_ENV', 'production')
+settings_object = 'pele.settings.%sConfig' % env.capitalize()
 
-    # register converters
-    app.url_map.converters['list'] = ListConverter
+app = Flask(__name__)
+app.config.from_object(settings_object)
+app.config.from_pyfile('../settings.cfg')  # override
 
-    # set debug logging level
-    if app.config.get('DEBUG', False):
-        app.logger.setLevel(logging.DEBUG)
+# register converters
+app.url_map.converters['list'] = ListConverter
 
-    cors.init_app(app)
-    app.wsgi_app = ReverseProxied(app.wsgi_app)
+# set debug logging level
+if app.config.get('DEBUG', False):
+    app.logger.setLevel(logging.DEBUG)
 
-    #init extensions
-    cache.init_app(app)
-    debug_toolbar.init_app(app)
-    bcrypt.init_app(app)
-    db.init_app(app)
-    login_manager.init_app(app)
-    limiter.init_app(app)
-    mail.init_app(app)
+cors.init_app(app)
+app.wsgi_app = ReverseProxied(app.wsgi_app)
 
-    # Import and register the different asset bundles
-    assets_env.init_app(app)
-    assets_loader = PythonAssetsLoader(assets)
-    for name, bundle in list(assets_loader.load_bundles().items()):
-        assets_env.register(name, bundle)
+#init extensions
+cache.init_app(app)
+debug_toolbar.init_app(app)
+bcrypt.init_app(app)
+db.init_app(app)
+login_manager.init_app(app)
+limiter.init_app(app)
+mail.init_app(app)
 
-    # register our blueprints
-    from .controllers.main import main
-    app.register_blueprint(main)
+# Import and register the different asset bundles
+assets_env.init_app(app)
+assets_loader = PythonAssetsLoader(assets)
+for name, bundle in list(assets_loader.load_bundles().items()):
+    assets_env.register(name, bundle)
 
-    from .controllers.api_v01 import services as api_v01
-    app.register_blueprint(api_v01)
+# register our blueprints
+from .controllers.main import main
+app.register_blueprint(main)
 
-    app.register_blueprint(apidoc.apidoc)
+from .controllers.api_v01 import services as api_v01
+app.register_blueprint(api_v01)
 
-    return app
+app.register_blueprint(apidoc.apidoc)
+
+# return app
 
 
-if __name__ == '__main__':
-    # Import the config for the proper environment using the
-    # shell var FLASK_ENV
-    env = os.environ.get('FLASK_ENV', 'production')
-    app = create_app('pele.settings.%sConfig' % env.capitalize())
-
-    app.run()
+# if __name__ == '__main__':
+#     # Import the config for the proper environment using the
+#     # shell var FLASK_ENV
+#     env = os.environ.get('FLASK_ENV', 'production')
+#     app = create_app('pele.settings.%sConfig' % env.capitalize())
+#
+#     app.run()

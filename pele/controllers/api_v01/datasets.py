@@ -2,13 +2,13 @@ from builtins import str
 from flask import current_app, request
 from flask_restx import Resource, fields
 
-from pele import limiter
+from pele import app, limiter
 from pele.controllers import token_required
 from pele.lib.es_connection import get_es_client
 from pele.lib.query import QueryES, get_page_size_and_offset
 from pele.controllers.api_v01.model import *
 
-ES_INDEX = current_app.config['ES_INDEX']
+ES_INDEX = app.config["ES_INDEX"]
 es_client = get_es_client()
 es_util = QueryES(es_client)
 
@@ -23,7 +23,6 @@ es_util = QueryES(es_client)
          description="Get all type names.")
 class Types(Resource):
     """Types."""
-
     model = api.model('Type', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -40,7 +39,6 @@ class Types(Resource):
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self):
-        
         try:
             page_size, offset = get_page_size_and_offset(request)
             total, types = es_util.query_types(ES_INDEX, offset, page_size)
@@ -69,7 +67,6 @@ class Types(Resource):
          description="Get all dataset names.")
 class Datasets(Resource):
     """Dataset names."""
-
     model = api.model('Dataset', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -86,7 +83,6 @@ class Datasets(Resource):
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self):
-
         try:
             page_size, offset = get_page_size_and_offset(request)
             total, datasets = es_util.query_datasets(ES_INDEX, offset, page_size)
@@ -116,7 +112,6 @@ class Datasets(Resource):
          description="Get all dataset names by type.")
 class DatasetsByType(Resource):
     """Dataset names by type."""
-
     model = api.model('DatasetsByType', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -133,7 +128,6 @@ class DatasetsByType(Resource):
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, type_name):
-        
         try:
             page_size, offset = get_page_size_and_offset(request)
             total, datasets = es_util.query_datasets_by_type(ES_INDEX, type_name, offset, page_size)
@@ -163,7 +157,6 @@ class DatasetsByType(Resource):
          description="Get all types by dataset name.")
 class TypesByDataset(Resource):
     """Types by dataset name."""
-
     model = api.model('TypesByDataset', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -180,7 +173,6 @@ class TypesByDataset(Resource):
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_name):
-        
         try:
             page_size, offset = get_page_size_and_offset(request)
             total, types = es_util.query_types_by_dataset(ES_INDEX, dataset_name, offset, page_size)
@@ -210,7 +202,6 @@ class TypesByDataset(Resource):
          description="Get all dataset IDs by dataset name.")
 class IdsByDataset(Resource):
     """IDs by dataset name."""
-
     model = api.model('IdsByDataset', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -227,7 +218,6 @@ class IdsByDataset(Resource):
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_name):
-        
         try:
             page_size, offset = get_page_size_and_offset(request)
             total, ids = es_util.query_ids_by_dataset(ES_INDEX, dataset_name, offset, page_size)
@@ -257,7 +247,6 @@ class IdsByDataset(Resource):
          description="Get all dataset IDs by type name.")
 class IdsByType(Resource):
     """IDs by type name."""
-
     model = api.model('IdsByType', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -301,7 +290,6 @@ class IdsByType(Resource):
          description="Get metadata by dataset ID.")
 class MetadataById(Resource):
     """Get metadata by dataset ID."""
-
     model = api.model('MetadataById', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -314,7 +302,6 @@ class MetadataById(Resource):
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_id):
-        
         result = es_util.query_id(ES_INDEX, dataset_id)
         return {
             'success': True,
@@ -335,7 +322,6 @@ class MetadataById(Resource):
          description="Get all dataset results by type name and dataset name.")
 class FieldsByTypeDataset(Resource):
     """Results by type name and dataset name."""
-
     model = api.model('FieldsByTypeDataset', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -387,7 +373,6 @@ class FieldsByTypeDataset(Resource):
          description="Get all dataset results that overlap temporally and spatially with dataset ID.")
 class OverlapsById(Resource):
     """Get all dataset results that overlap temporally and spatially with dataset ID."""
-
     model = api.model('OverlapsById', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -438,7 +423,6 @@ class OverlapsById(Resource):
                      "dataset.")
 class OverlapsByIdTypeDataset(Resource):
     """Get all dataset results that overlap temporally and spatially with dataset ID of a certain type and dataset."""
-
     model = api.model('OverlapsByIdTypeDataset', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -455,7 +439,6 @@ class OverlapsByIdTypeDataset(Resource):
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_id, type_name, dataset_name, ret_fields):
-        
         terms = {
             'dataset_type.keyword': type_name,
             'dataset.keyword': dataset_name,
