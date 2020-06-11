@@ -211,7 +211,6 @@ class QueryES(object):
           ]
         }
         """
-
         s = Search(using=self.client, index=index).query(Q('term', _id=_id))
         if self.logger:
             self.logger.debug(json.dumps(s.to_dict(), indent=2))
@@ -237,15 +236,11 @@ class QueryES(object):
               ]
             }
           },
-          "partial_fields": {
-            "partial": {
-              "include": [
-                "id",
-                "metadata.trackNumber",
-                "location"
-              ]
-            }
-          }
+          "_source": [
+            "id",
+            "metadata.trackNumber",
+            "location"
+          ]
         }
         """
 
@@ -256,7 +251,8 @@ class QueryES(object):
                 q = Q('term', **{f: val})
             else:
                 q += Q('term', **{f: val})
-        s = Search(using=self.client, index=index).query(q).partial_fields(partial={'include': fields})
+        s = Search(using=self.client, index=index).query(q)
+        s._source = fields
 
         # sort by starttime in descending order; TODO: expose sort parameters out through API
         s = s.sort({
@@ -264,9 +260,11 @@ class QueryES(object):
                 "order": "desc"
             }
         })
+        s = s[offset:offset + page_size]
+
         if self.logger:
             self.logger.debug(json.dumps(s.to_dict(), indent=2))
-        return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]
+        return s.count(), [i.to_dict() for i in s]
 
     def overlaps(self, index, _id, terms, fields, offset, page_size):
         """Return list of documents that overlap temporally and spatially:
@@ -328,18 +326,16 @@ class QueryES(object):
               }
             }
           },
-          "partial_fields": {
-            "partial": {
-              "include": [
-                "id"
-              ]
-            }
-          }
+          "_source": [
+            "id",
+            "metadata.trackNumber",
+            "location"
+          ]
         }
         """
 
         # get document by id
-        doc = self.query_id(_id)
+        doc = self.query_id(index, _id)
         if self.logger:
             self.logger.debug(json.dumps(doc, indent=2))
         if doc is None:
@@ -381,7 +377,9 @@ class QueryES(object):
             s = s.query(q)
         if f is not None:
             s = s.filter(f)
-        s = s.partial_fields(partial={'include': fields})
+        s._source = fields
+
         if self.logger:
             self.logger.debug(json.dumps(s.to_dict(), indent=2))
+
         return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]

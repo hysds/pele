@@ -17,7 +17,7 @@ class ListConverter(BaseConverter):
         return [i.strip() for i in value.split(',')]
 
     def to_url(self, values):
-        return ','.join(BaseConverter.to_url(value) for value in values)
+        return ','.join(super(ListConverter, self).to_url(value) for value in values)
     
 
 class ReverseProxied(object):

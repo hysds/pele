@@ -315,7 +315,8 @@ class MetadataById(Resource):
         }
 
 
-@pele_ns.route('/type/<string:type_name>/dataset/<string:dataset_name>/<list:ret_fields>', endpoint='fields_by_type_and_dataset')
+@pele_ns.route('/type/<string:type_name>/dataset/<string:dataset_name>/<list:ret_fields>',
+               endpoint='fields_by_type_and_dataset')
 @pele_ns.param('type_name', 'type name')
 @pele_ns.param('dataset_name', 'dataset name')
 @pele_ns.param('ret_fields', 'comma-separated fields to return')
