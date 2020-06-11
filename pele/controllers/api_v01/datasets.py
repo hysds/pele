@@ -10,7 +10,7 @@ from pele.controllers.api_v01.model import *
 
 ES_INDEX = app.config["ES_INDEX"]
 es_client = get_es_client()
-es_util = QueryES(es_client)
+es_util = QueryES(es_client, logger=app.logger)
 
 
 @pele_ns.route('/types', endpoint='types')
@@ -35,7 +35,7 @@ class Types(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    @token_required
+    # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self):
@@ -51,6 +51,7 @@ class Types(Resource):
                 'types': types
             }
         except Exception as e:
+            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -79,7 +80,7 @@ class Datasets(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    @token_required
+    # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self):
@@ -95,6 +96,7 @@ class Datasets(Resource):
                 'datasets': datasets
             }
         except Exception as e:
+            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -124,7 +126,7 @@ class DatasetsByType(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    @token_required
+    # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, type_name):
@@ -140,6 +142,7 @@ class DatasetsByType(Resource):
                 'datasets': datasets
             }
         except Exception as e:
+            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -169,7 +172,7 @@ class TypesByDataset(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    @token_required
+    # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_name):
@@ -185,6 +188,7 @@ class TypesByDataset(Resource):
                 'types': types
             }
         except Exception as e:
+            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -195,10 +199,10 @@ class TypesByDataset(Resource):
 @pele_ns.param('dataset_name', 'dataset name')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Execution failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Execution failed"},
          description="Get all dataset IDs by dataset name.")
 class IdsByDataset(Resource):
     """IDs by dataset name."""
@@ -214,7 +218,7 @@ class IdsByDataset(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    @token_required
+    # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_name):
@@ -230,6 +234,7 @@ class IdsByDataset(Resource):
                 'dataset_ids': ids
             }
         except Exception as e:
+            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -240,10 +245,10 @@ class IdsByDataset(Resource):
 @pele_ns.param('type_name', 'type name')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Execution failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Execution failed"},
          description="Get all dataset IDs by type name.")
 class IdsByType(Resource):
     """IDs by type name."""
@@ -259,7 +264,7 @@ class IdsByType(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    @token_required
+    # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, type_name):
@@ -275,6 +280,7 @@ class IdsByType(Resource):
                 'dataset_ids': ids
             }
         except Exception as e:
+            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -283,10 +289,10 @@ class IdsByType(Resource):
 
 @pele_ns.route('/dataset/<string:dataset_id>', endpoint='dataset_by_id')
 @pele_ns.param('dataset_id', 'dataset ID')
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Execution failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Execution failed"},
          description="Get metadata by dataset ID.")
 class MetadataById(Resource):
     """Get metadata by dataset ID."""
@@ -298,7 +304,7 @@ class MetadataById(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    @token_required
+    # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_id):
@@ -315,10 +321,10 @@ class MetadataById(Resource):
 @pele_ns.param('ret_fields', 'comma-separated fields to return')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Execution failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Execution failed"},
          description="Get all dataset results by type name and dataset name.")
 class FieldsByTypeDataset(Resource):
     """Results by type name and dataset name."""
@@ -334,7 +340,7 @@ class FieldsByTypeDataset(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    @token_required
+    # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, type_name, dataset_name, ret_fields):
@@ -366,10 +372,10 @@ class FieldsByTypeDataset(Resource):
 @pele_ns.param('ret_fields', 'comma-separated fields to return')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
-@api.doc(responses={ 200: "Success",
-                     400: "Invalid parameters",
-                     401: "Unathorized",
-                     500: "Execution failed" },
+@api.doc(responses={200: "Success",
+                    400: "Invalid parameters",
+                    401: "Unathorized",
+                    500: "Execution failed"},
          description="Get all dataset results that overlap temporally and spatially with dataset ID.")
 class OverlapsById(Resource):
     """Get all dataset results that overlap temporally and spatially with dataset ID."""
@@ -385,7 +391,7 @@ class OverlapsById(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    @token_required
+    # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_id, ret_fields):
@@ -435,7 +441,7 @@ class OverlapsByIdTypeDataset(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    @token_required
+    # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_id, type_name, dataset_name, ret_fields):

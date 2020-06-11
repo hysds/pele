@@ -86,6 +86,7 @@ env = os.environ.get('FLASK_ENV', 'production')
 settings_object = 'pele.settings.%sConfig' % env.capitalize()
 
 app = Flask(__name__)
+app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.config.from_object(settings_object)
 app.config.from_pyfile('../settings.cfg')  # override
 
@@ -97,7 +98,6 @@ if app.config.get('DEBUG', False):
     app.logger.setLevel(logging.DEBUG)
 
 cors.init_app(app)
-app.wsgi_app = ReverseProxied(app.wsgi_app)
 
 #init extensions
 cache.init_app(app)
