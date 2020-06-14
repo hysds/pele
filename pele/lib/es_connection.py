@@ -1,5 +1,4 @@
 # from flask import current_app
-from pele import app
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 
