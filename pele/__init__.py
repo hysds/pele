@@ -9,7 +9,6 @@ from werkzeug.routing import BaseConverter
 from pele import assets
 from pele.extensions import (cache, assets_env, debug_toolbar, login_manager, cors, bcrypt, db, limiter, mail)
 
-# TODO: fix es_connection function
 from pele.lib.es_connection import get_es_client
 from pele.lib.query import QueryES
 
@@ -100,7 +99,7 @@ def create_app(object_name):
     cors.init_app(app)
     app.wsgi_app = ReverseProxied(app.wsgi_app)
 
-    app.es_client = get_es_client(app.config)  # TODO: maybe move the es connection here
+    app.es_client = get_es_client(app.config)
     app.es_util = QueryES(app.es_client, logger=app.logger)
 
     # init extensions

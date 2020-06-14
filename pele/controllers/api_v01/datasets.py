@@ -9,11 +9,6 @@ from pele.controllers.api_v01.config import api, pele_ns
 from pele.controllers.api_v01.model import *
 
 
-# ES_INDEX = app.config["ES_INDEX"]
-# es_client = get_es_client()
-# es_util = QueryES(es_client, logger=app.logger)
-
-
 @pele_ns.route('/types', endpoint='types')
 @pele_ns.param('offset', 'offset', type=int)
 @pele_ns.param('page_size', 'page size', type=int)
