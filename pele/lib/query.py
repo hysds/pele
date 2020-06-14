@@ -1,16 +1,16 @@
 from builtins import object
 import json
 from elasticsearch_dsl import FacetedSearch, Search, Q, A
-from pele import app
+from flask import current_app
 
 from pele import cache
 
 
 def get_page_size(r):
     """Return page size."""
-    page_size = int(r.form.get('page_size', r.args.get('page_size', app.config['DEFAULT_PAGE_SIZE'])))
-    if page_size > app.config['MAX_PAGE_SIZE']:
-        raise RuntimeError("Maximum page size is {}.".format(app.config['MAX_PAGE_SIZE']))
+    page_size = int(r.form.get('page_size', r.args.get('page_size', current_app.config['DEFAULT_PAGE_SIZE'])))
+    if page_size > current_app.config['MAX_PAGE_SIZE']:
+        raise RuntimeError("Maximum page size is {}.".format(current_app.config['MAX_PAGE_SIZE']))
     return page_size
 
 
