@@ -1,7 +1,6 @@
 from builtins import object
-import json, requests
+import json
 from elasticsearch_dsl import FacetedSearch, Search, Q, A
-# from flask import app
 from pele import app
 
 from pele import cache

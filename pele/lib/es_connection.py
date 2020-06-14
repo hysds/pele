@@ -7,14 +7,14 @@ from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 ES_CLIENT = None
 
 
-def get_es_client():
+def get_es_client(config):
     global ES_CLIENT
 
-    aws_es = app.config.get('AWS_ES', False)
-    aws_region = app.config.get('AWS_REGION')
+    aws_es = config.get('AWS_ES', False)
+    aws_region = config.get('AWS_REGION')
 
-    es_host = app.config.get('ES_HOST', '127.0.0.1')
-    es_url = app.config.get('ES_URL', 'http://127.0.0.1:9200')
+    es_host = config.get('ES_HOST', '127.0.0.1')
+    es_url = config.get('ES_URL', 'http://127.0.0.1:9200')
 
     if ES_CLIENT is None:
         if aws_es is True:

@@ -1,16 +1,17 @@
 from builtins import str
 from flask import current_app, request
-from flask_restx import Resource, fields
+from flask_restx import Resource, fields, inputs
 
-from pele import app, limiter
+from pele import limiter
 from pele.controllers import token_required
-from pele.lib.es_connection import get_es_client
-from pele.lib.query import QueryES, get_page_size_and_offset
+from pele.lib.query import get_page_size_and_offset
+from pele.controllers.api_v01.config import api, pele_ns
 from pele.controllers.api_v01.model import *
 
-ES_INDEX = app.config["ES_INDEX"]
-es_client = get_es_client()
-es_util = QueryES(es_client, logger=app.logger)
+
+# ES_INDEX = app.config["ES_INDEX"]
+# es_client = get_es_client()
+# es_util = QueryES(es_client, logger=app.logger)
 
 
 @pele_ns.route('/types', endpoint='types')
@@ -34,6 +35,7 @@ class Types(Resource):
     })
 
     decorators = [limiter.limit("10/second")]
+    index = current_app.config["ES_INDEX"]
 
     # @token_required
     @api.marshal_with(model)
@@ -41,7 +43,7 @@ class Types(Resource):
     def get(self):
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, types = es_util.query_types(ES_INDEX, offset, page_size)
+            total, types = current_app.es_util.query_types(self.index, offset, page_size)
             return {
                 'success': True,
                 'total': total,
@@ -79,6 +81,7 @@ class Datasets(Resource):
     })
 
     decorators = [limiter.limit("10/second")]
+    index = current_app.config["ES_INDEX"]
 
     # @token_required
     @api.marshal_with(model)
@@ -86,7 +89,7 @@ class Datasets(Resource):
     def get(self):
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, datasets = es_util.query_datasets(ES_INDEX, offset, page_size)
+            total, datasets = current_app.es_util.query_datasets(self.index, offset, page_size)
             return {
                 'success': True,
                 'total': total,
@@ -125,6 +128,7 @@ class DatasetsByType(Resource):
     })
 
     decorators = [limiter.limit("10/second")]
+    index = current_app.config["ES_INDEX"]
 
     # @token_required
     @api.marshal_with(model)
@@ -132,7 +136,7 @@ class DatasetsByType(Resource):
     def get(self, type_name):
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, datasets = es_util.query_datasets_by_type(ES_INDEX, type_name, offset, page_size)
+            total, datasets = current_app.es_util.query_datasets_by_type(self.index, type_name, offset, page_size)
             return {
                 'success': True,
                 'total': total,
@@ -171,6 +175,7 @@ class TypesByDataset(Resource):
     })
 
     decorators = [limiter.limit("10/second")]
+    index = current_app.config["ES_INDEX"]
 
     # @token_required
     @api.marshal_with(model)
@@ -178,7 +183,7 @@ class TypesByDataset(Resource):
     def get(self, dataset_name):
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, types = es_util.query_types_by_dataset(ES_INDEX, dataset_name, offset, page_size)
+            total, types = current_app.es_util.query_types_by_dataset(self.index, dataset_name, offset, page_size)
             return {
                 'success': True,
                 'total': total,
@@ -217,6 +222,7 @@ class IdsByDataset(Resource):
     })
 
     decorators = [limiter.limit("10/second")]
+    index = current_app.config["ES_INDEX"]
 
     # @token_required
     @api.marshal_with(model)
@@ -224,7 +230,7 @@ class IdsByDataset(Resource):
     def get(self, dataset_name):
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, ids = es_util.query_ids_by_dataset(ES_INDEX, dataset_name, offset, page_size)
+            total, ids = current_app.es_util.query_ids_by_dataset(self.index, dataset_name, offset, page_size)
             return {
                 'success': True,
                 'total': total,
@@ -263,6 +269,7 @@ class IdsByType(Resource):
     })
 
     decorators = [limiter.limit("10/second")]
+    index = current_app.config["ES_INDEX"]
 
     # @token_required
     @api.marshal_with(model)
@@ -270,7 +277,7 @@ class IdsByType(Resource):
     def get(self, type_name):
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, ids = es_util.query_ids_by_type(ES_INDEX, type_name, offset, page_size)
+            total, ids = current_app.es_util.query_ids_by_type(self.index, type_name, offset, page_size)
             return {
                 'success': True,
                 'total': total,
@@ -303,12 +310,13 @@ class MetadataById(Resource):
     })
 
     decorators = [limiter.limit("10/second")]
+    index = current_app.config["ES_INDEX"]
 
     # @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_id):
-        result = es_util.query_id(ES_INDEX, dataset_id)
+        result = current_app.es_util.query_id(self.index, dataset_id)
         return {
             'success': True,
             'result': result
@@ -340,6 +348,7 @@ class FieldsByTypeDataset(Resource):
     })
 
     decorators = [limiter.limit("10/second")]
+    index = current_app.config["ES_INDEX"]
 
     # @token_required
     @api.marshal_with(model)
@@ -350,9 +359,9 @@ class FieldsByTypeDataset(Resource):
             'dataset.keyword': dataset_name,
         }
         try:
-            index = "{}_*_{}".format(ES_INDEX, dataset_name.lower())
+            index = "{}_*_{}".format(self.index, dataset_name.lower())
             page_size, offset = get_page_size_and_offset(request)
-            total, docs = es_util.query_fields(index, terms, ret_fields, offset, page_size)
+            total, docs = current_app.es_util.query_fields(index, terms, ret_fields, offset, page_size)
             return {
                 'success': True,
                 'total': total,
@@ -391,6 +400,7 @@ class OverlapsById(Resource):
     })
 
     decorators = [limiter.limit("10/second")]
+    index = current_app.config["ES_INDEX"]
 
     # @token_required
     @api.marshal_with(model)
@@ -398,7 +408,7 @@ class OverlapsById(Resource):
     def get(self, dataset_id, ret_fields):
         try:
             page_size, offset = get_page_size_and_offset(request)
-            total, docs = es_util.overlaps(ES_INDEX, dataset_id, {}, ret_fields, offset, page_size)
+            total, docs = current_app.es_util.overlaps(self.index, dataset_id, {}, ret_fields, offset, page_size)
             return {
                 'success': True,
                 'total': total,

@@ -9,6 +9,10 @@ from werkzeug.routing import BaseConverter
 from pele import assets
 from pele.extensions import (cache, assets_env, debug_toolbar, login_manager, cors, bcrypt, db, limiter, mail)
 
+# TODO: fix es_connection function
+from pele.lib.es_connection import get_es_client
+from pele.lib.query import QueryES
+
 
 class ListConverter(BaseConverter):
     regex = r'.+(?:,.+)*,?'
@@ -72,64 +76,63 @@ class ReverseProxied(object):
         return self.app(environ, start_response)
 
 
-# def create_app(object_name):
-"""
-An flask application factory, as explained here:
-http://flask.pocoo.org/docs/patterns/appfactories/
+def create_app(object_name):
+    """
+    An flask application factory, as explained here:
+    http://flask.pocoo.org/docs/patterns/appfactories/
 
-Arguments:
-    object_name: the python path of the config object,
-                 e.g. pele.settings.ProductionConfig
-"""
+    Arguments:
+        object_name: the python path of the config object,
+                     e.g. pele.settings.ProductionConfig
+    """
 
-env = os.environ.get('FLASK_ENV', 'production')
-settings_object = 'pele.settings.%sConfig' % env.capitalize()
+    app = Flask(__name__)
+    app.config.from_object(object_name)
+    app.config.from_pyfile('../settings.cfg')  # override
 
-app = Flask(__name__)
-app.wsgi_app = ReverseProxied(app.wsgi_app)
-app.config.from_object(settings_object)
-app.config.from_pyfile('../settings.cfg')  # override
+    # register converters
+    app.url_map.converters['list'] = ListConverter
 
-# register converters
-app.url_map.converters['list'] = ListConverter
+    # set debug logging level
+    if app.config.get('DEBUG', False):
+        app.logger.setLevel(logging.DEBUG)
 
-# set debug logging level
-if app.config.get('DEBUG', False):
-    app.logger.setLevel(logging.DEBUG)
+    cors.init_app(app)
+    app.wsgi_app = ReverseProxied(app.wsgi_app)
 
-cors.init_app(app)
+    app.es_client = get_es_client(app.config)  # TODO: maybe move the es connection here
+    app.es_util = QueryES(app.es_client, logger=app.logger)
 
-#init extensions
-cache.init_app(app)
-debug_toolbar.init_app(app)
-bcrypt.init_app(app)
-db.init_app(app)
-login_manager.init_app(app)
-limiter.init_app(app)
-mail.init_app(app)
+    # init extensions
+    cache.init_app(app)
+    debug_toolbar.init_app(app)
+    bcrypt.init_app(app)
+    db.init_app(app)
+    login_manager.init_app(app)
+    limiter.init_app(app)
+    mail.init_app(app)
 
-# Import and register the different asset bundles
-assets_env.init_app(app)
-assets_loader = PythonAssetsLoader(assets)
-for name, bundle in list(assets_loader.load_bundles().items()):
-    assets_env.register(name, bundle)
+    # Import and register the different asset bundles
+    assets_env.init_app(app)
+    assets_loader = PythonAssetsLoader(assets)
+    for name, bundle in list(assets_loader.load_bundles().items()):
+        assets_env.register(name, bundle)
 
-# register our blueprints
-from .controllers.main import main
-app.register_blueprint(main)
+    # register our blueprints
+    from .controllers.main import main
+    app.register_blueprint(main)
 
-from .controllers.api_v01 import services as api_v01
-app.register_blueprint(api_v01)
+    from .controllers.api_v01 import services as api_v01
+    app.register_blueprint(api_v01)
+    app.register_blueprint(apidoc.apidoc)
 
-app.register_blueprint(apidoc.apidoc)
-
-# return app
+    return app
 
 
-# if __name__ == '__main__':
-#     # Import the config for the proper environment using the
-#     # shell var FLASK_ENV
-#     env = os.environ.get('FLASK_ENV', 'production')
-#     app = create_app('pele.settings.%sConfig' % env.capitalize())
-#
-#     app.run()
+if __name__ == '__main__':
+    # Import the config for the proper environment using the
+    # shell var FLASK_ENV
+    env = os.environ.get('FLASK_ENV', 'production')
+    app = create_app('pele.settings.%sConfig' % env.capitalize())
+
+    app.run()
