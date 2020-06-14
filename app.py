@@ -1,7 +1,6 @@
 import os, sys, click, unittest, coverage
 from flask_migrate import Migrate, MigrateCommand
 
-# from pele import app, db
 from pele import create_app, db
 
 COV = coverage.coverage(

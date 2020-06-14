@@ -53,7 +53,6 @@ class Types(Resource):
                 'types': types
             }
         except Exception as e:
-            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -99,7 +98,6 @@ class Datasets(Resource):
                 'datasets': datasets
             }
         except Exception as e:
-            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -146,7 +144,6 @@ class DatasetsByType(Resource):
                 'datasets': datasets
             }
         except Exception as e:
-            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -193,7 +190,6 @@ class TypesByDataset(Resource):
                 'types': types
             }
         except Exception as e:
-            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -240,7 +236,6 @@ class IdsByDataset(Resource):
                 'dataset_ids': ids
             }
         except Exception as e:
-            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
@@ -287,7 +282,6 @@ class IdsByType(Resource):
                 'dataset_ids': ids
             }
         except Exception as e:
-            app.logger.error(e)
             return {
                 'success': False,
                 'message': str(e),
