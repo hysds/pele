@@ -31,7 +31,7 @@ class Types(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    # @token_required
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self):
@@ -76,7 +76,7 @@ class Datasets(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    # @token_required
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self):
@@ -122,7 +122,7 @@ class DatasetsByType(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    # @token_required
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, type_name):
@@ -168,7 +168,7 @@ class TypesByDataset(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    # @token_required
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_name):
@@ -214,7 +214,7 @@ class IdsByDataset(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    # @token_required
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_name):
@@ -260,7 +260,7 @@ class IdsByType(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    # @token_required
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, type_name):
@@ -300,7 +300,7 @@ class MetadataById(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    # @token_required
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_id):
@@ -338,7 +338,7 @@ class FieldsByTypeDataset(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    # @token_required
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, type_name, dataset_name, ret_fields):
@@ -390,7 +390,7 @@ class OverlapsById(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    # @token_required
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_id, ret_fields):
@@ -441,7 +441,7 @@ class OverlapsByIdTypeDataset(Resource):
 
     decorators = [limiter.limit("10/second")]
 
-    # @token_required
+    @token_required
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_id, type_name, dataset_name, ret_fields):
