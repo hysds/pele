@@ -3,7 +3,6 @@ from flask_migrate import Migrate, MigrateCommand
 
 from pele import create_app, db
 
-
 COV = coverage.coverage(
     branch=True,
     include='pele/*',
@@ -14,11 +13,8 @@ COV = coverage.coverage(
 )
 COV.start()
 
-
 env = os.environ.get('FLASK_ENV', 'development')
 app = create_app('pele.settings.%sConfig' % env.capitalize())
-
-
 migrate = Migrate(app, db)
 
 

@@ -1,6 +1,7 @@
 from builtins import str
 from functools import wraps
-import traceback, jwt
+import traceback
+import jwt
 
 from flask import request, current_app
 
@@ -15,6 +16,7 @@ authorizations = {
         'name': 'X-API-KEY',
     }
 }
+
 
 def token_required(f):
     @wraps(f)
@@ -31,15 +33,18 @@ def token_required(f):
 
         token = request.headers.get('X-API-KEY', None)
         current_app.logger.debug("token: {}".format(token))
-        if token is None: return invalid_msg, 401
+        if token is None:
+            return invalid_msg, 401
 
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
             current_app.logger.debug("data: {}".format(data))
             user = User.query.filter_by(email=data['sub']).first()
             if not user:
-                return { 'message': 'User not found',
-                         'success': False }, 401
+                return {
+                    'message': 'User not found',
+                    'success': False
+                }, 401
             return f(*args, **kwargs)
         except jwt.ExpiredSignatureError:
             current_app.logger.debug("jwt.ExpiredSignatureError: {}".format(traceback.format_exc()))
@@ -49,8 +54,10 @@ def token_required(f):
             return invalid_msg, 401
         except Exception as e:
             current_app.logger.debug(traceback.format_exc())
-            return { 'message': "Unknown error: {}".format(str(e)),
-                     'success': False }, 401
+            return {
+                'message': "Unknown error: {}".format(str(e)),
+                'success': False
+            }, 401
 
     return _verify
 

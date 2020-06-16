@@ -9,6 +9,9 @@ from werkzeug.routing import BaseConverter
 from pele import assets
 from pele.extensions import (cache, assets_env, debug_toolbar, login_manager, cors, bcrypt, db, limiter, mail)
 
+from pele.lib.es_connection import get_es_client
+from pele.lib.query import QueryES
+
 
 class ListConverter(BaseConverter):
     regex = r'.+(?:,.+)*,?'
@@ -17,7 +20,7 @@ class ListConverter(BaseConverter):
         return [i.strip() for i in value.split(',')]
 
     def to_url(self, values):
-        return ','.join(BaseConverter.to_url(value) for value in values)
+        return ','.join(super(ListConverter, self).to_url(value) for value in values)
     
 
 class ReverseProxied(object):
@@ -85,7 +88,7 @@ def create_app(object_name):
 
     app = Flask(__name__)
     app.config.from_object(object_name)
-    app.config.from_pyfile('../settings.cfg') # override
+    app.config.from_pyfile('../settings.cfg')  # override
 
     # register converters
     app.url_map.converters['list'] = ListConverter
@@ -97,7 +100,10 @@ def create_app(object_name):
     cors.init_app(app)
     app.wsgi_app = ReverseProxied(app.wsgi_app, app.config)
 
-    #init extensions
+    app.es_client = get_es_client(app.config)
+    app.es_util = QueryES(app.es_client, logger=app.logger)
+
+    # init extensions
     cache.init_app(app)
     debug_toolbar.init_app(app)
     bcrypt.init_app(app)
@@ -118,7 +124,6 @@ def create_app(object_name):
 
     from .controllers.api_v01 import services as api_v01
     app.register_blueprint(api_v01)
-
     app.register_blueprint(apidoc.apidoc)
 
     return app

@@ -43,5 +43,6 @@ setup(
         'webassets',
         'lxml',
         'nodeenv',
+        "aws-requests-auth==0.4.2",
     ]
 )
