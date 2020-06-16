@@ -52,18 +52,19 @@ class ReverseProxied(object):
 
     :param app: the WSGI application
     """
-    def __init__(self, app):
+    def __init__(self, app, config):
         self.app = app
+        self.config = config
 
     def __call__(self, environ, start_response):
-        script_name = environ.get('HTTP_X_SCRIPT_NAME', '')
+        script_name = environ.get('HTTP_X_SCRIPT_NAME', self.config.get('HTTP_X_SCRIPT_NAME', ''))
         if script_name:
             environ['SCRIPT_NAME'] = script_name
             path_info = environ['PATH_INFO']
             if path_info.startswith(script_name):
                 environ['PATH_INFO'] = path_info[len(script_name):]
 
-        scheme = environ.get('HTTP_X_SCHEME', '')
+        scheme = environ.get('HTTP_X_SCHEME', self.config.get('HTTP_X_SCHEME', ''))
         if scheme:
             environ['wsgi.url_scheme'] = scheme
         x_forwarded_host = environ.get('HTTP_X_FORWARDED_HOST', '')
@@ -94,7 +95,7 @@ def create_app(object_name):
         app.logger.setLevel(logging.DEBUG)
 
     cors.init_app(app)
-    app.wsgi_app = ReverseProxied(app.wsgi_app)
+    app.wsgi_app = ReverseProxied(app.wsgi_app, app.config)
 
     #init extensions
     cache.init_app(app)
