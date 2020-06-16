@@ -3,19 +3,20 @@ import json, requests, time
 
 
 class PeleRequests(object):
-    def __init__(self, base_url):
+    def __init__(self, base_url, verify=True):
         self.session = requests.session()
         self.base_url = base_url 
+        self.verify = verify 
         self.token = None
         self._set_token()
 
     def _set_token(self):
-        r = self.session.post(self.base_url + '/login')
+        r = self.session.post(self.base_url + '/login', verify=self.verify)
         if r.status_code == 429 and 'Retry-After' in r.headers:
             sleep_time = float(r.headers['Retry-After'])
             print("hit rate limit. sleeping for {} seconds".format(sleep_time))
             time.sleep(sleep_time)
-            r = self.session.post(self.base_url + '/login')
+            r = self.session.post(self.base_url + '/login', verify=self.verify)
         r.raise_for_status()
         self.token = r.json()['token']
 
