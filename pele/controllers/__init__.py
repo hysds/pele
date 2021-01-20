@@ -21,6 +21,8 @@ authorizations = {
 def token_required(f):
     @wraps(f)
     def _verify(*args, **kwargs):
+        if current_app.config.get('AUTH', False) is False:
+            return f(*args, **kwargs)
 
         invalid_msg = {
             'message': 'Invalid token. Registeration and/or authentication required',
