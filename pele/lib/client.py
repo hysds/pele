@@ -1,9 +1,15 @@
 from builtins import object
-import json, requests, time
+import requests, time
 
 
 class PeleRequests(object):
-    def __init__(self, base_url, verify=True):
+    def __init__(self, base_url, verify=True, auth=True):
+        """
+        :param base_url: Pele's Rest API base endpoint
+        :param verify: verify requests with SSL certs
+        :param auth: (boolean) authenticate requests (set to True if Pele's Rest API server is authenticated)
+        """
+        self.auth = auth
         self.session = requests.session()
         self.base_url = base_url 
         self.verify = verify 
@@ -21,43 +27,46 @@ class PeleRequests(object):
         self.token = r.json()['token']
 
     def _decorator(f):
-        def wrapper(self, *args, **kargs):
-            if 'X-API-KEY' not in kargs.get('headers', {}):
-                kargs.setdefault('headers', {})['X-API-KEY'] = self.token
-            r = f(self, *args, **kargs)
-            if r.status_code == 401:
-                self._set_token() # refresh token
-                kargs['headers']['X-API-KEY'] = self.token
-                r = f(self, *args, **kargs)
+        def wrapper(self, *args, **kwargs):
+            if self.auth is False:
+                r = f(self, *args, **kwargs)
+            else:
+                if 'X-API-KEY' not in kwargs.get('headers', {}):
+                    kwargs.setdefault('headers', {})['X-API-KEY'] = self.token
+                r = f(self, *args, **kwargs)
+                if r.status_code == 401:
+                    self._set_token()  # refresh token
+                    kwargs['headers']['X-API-KEY'] = self.token
+                    r = f(self, *args, **kwargs)
             return r
         return wrapper
 
     @_decorator
-    def request(self, *args, **kargs):
-        return self.session.request(*args, **kargs)
+    def request(self, *args, **kwargs):
+        return self.session.request(*args, **kwargs)
 
     @_decorator
-    def head(self, *args, **kargs):
-        return self.session.head(*args, **kargs)
+    def head(self, *args, **kwargs):
+        return self.session.head(*args, **kwargs)
 
     @_decorator
-    def get(self, *args, **kargs):
-        return self.session.get(*args, **kargs)
+    def get(self, *args, **kwargs):
+        return self.session.get(*args, **kwargs)
 
     @_decorator
-    def post(self, *args, **kargs):
-        return self.session.post(*args, **kargs)
+    def post(self, *args, **kwargs):
+        return self.session.post(*args, **kwargs)
 
     @_decorator
-    def put(self, *args, **kargs):
-        return self.session.put(*args, **kargs)
+    def put(self, *args, **kwargs):
+        return self.session.put(*args, **kwargs)
 
     @_decorator
-    def patch(self, *args, **kargs):
-        return self.session.patch(*args, **kargs)
+    def patch(self, *args, **kwargs):
+        return self.session.patch(*args, **kwargs)
 
     @_decorator
-    def delete(self, *args, **kargs):
-        return self.session.delete(*args, **kargs)
+    def delete(self, *args, **kwargs):
+        return self.session.delete(*args, **kwargs)
 
     _decorator = staticmethod(_decorator)
