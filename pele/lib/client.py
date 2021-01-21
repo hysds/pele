@@ -14,7 +14,8 @@ class PeleRequests(object):
         self.base_url = base_url 
         self.verify = verify 
         self.token = None
-        self._set_token()
+        if self.auth:
+            self._set_token()
 
     def _set_token(self):
         r = self.session.post(self.base_url + '/login', verify=self.verify)
