@@ -29,6 +29,8 @@ class PeleRequests(object):
 
     def _decorator(f):
         def wrapper(self, *args, **kwargs):
+            if 'verify' not in kwargs:
+                kwargs['verify'] = self.verify
             if self.auth is False:
                 r = f(self, *args, **kwargs)
             else:
