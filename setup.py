@@ -43,5 +43,7 @@ setup(
         'webassets',
         'lxml',
         'nodeenv',
+        'botocore',
+        "aws-requests-auth==0.4.2",
     ]
 )

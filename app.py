@@ -3,7 +3,6 @@ from flask_migrate import Migrate, MigrateCommand
 
 from pele import create_app, db
 
-
 COV = coverage.coverage(
     branch=True,
     include='pele/*',
@@ -14,11 +13,8 @@ COV = coverage.coverage(
 )
 COV.start()
 
-
-env = os.environ.get('FLASK_ENV', 'development')
+env = os.environ.get('FLASK_ENV', 'production')
 app = create_app('pele.settings.%sConfig' % env.capitalize())
-
-
 migrate = Migrate(app, db)
 
 
@@ -64,7 +60,8 @@ def create_db():
     """Creates the db tables."""
 
     dbdir = app.config['DB_DIR']
-    if not os.path.isdir(dbdir): os.makedirs(dbdir, 0o755)
+    if not os.path.isdir(dbdir):
+        os.makedirs(dbdir, 0o755)
     db.create_all()
 
 

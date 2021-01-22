@@ -9,7 +9,7 @@ DB_DIR = os.path.join(BASE_DIR, 'data')
 class Config(object):
     DB_DIR = DB_DIR
     SECRET_KEY = 'secret key'
-    ES_URL = 'http://127.0.0.1:9200' # default port is 9200
+    ES_URL = 'http://127.0.0.1:9200'  # default port is 9200
 
     # disable sqlalchemy modification tracking
     SQLALCHEMY_TRACK_MODIFICATIONS = False
