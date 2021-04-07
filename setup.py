@@ -38,7 +38,7 @@ setup(
         # 'Cartopy==0.13.1',
         'redis',
         'bcrypt',
-        'PyJWT',
+        'PyJWT==1.7.1',
         'coverage',
         'webassets',
         'lxml',
