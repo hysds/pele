@@ -1,5 +1,6 @@
 from builtins import object
-import os, logging
+import os
+import logging
 
 from flask import Flask
 from flask_restx import apidoc

@@ -2,9 +2,11 @@ from builtins import str
 from flask import current_app, request
 from flask_restx import Resource, fields, inputs
 
+from elasticsearch import ElasticsearchException
+
 from pele import limiter
 from pele.controllers import token_required
-from pele.lib.query import get_page_size_and_offset
+from pele.lib.query import get_page_size_and_offset, parse_polygon
 from pele.controllers.api_v01.config import api, pele_ns
 from pele.controllers.api_v01.model import *
 
@@ -18,7 +20,8 @@ from pele.controllers.api_v01.model import *
                     500: "Execution failed"},
          description="Get all type names.")
 class Types(Resource):
-    """Types."""
+    """GRQ dataset types."""
+
     model = api.model('Type', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -202,6 +205,17 @@ class TypesByDataset(Resource):
          description="Get all dataset IDs by dataset name.")
 class IdsByDataset(Resource):
     """IDs by dataset name."""
+
+    arg_parser = pele_ns.parser()
+    arg_parser.add_argument('start_time', type=str, help="GTE to start_time field", required=False)
+    arg_parser.add_argument('end_time', type=str, help="Less than to end_time field", required=False)
+    arg_parser.add_argument('polygon', type=str, help="Bounding geo-polygon", required=False)
+
+    json_parser = pele_ns.parser()
+    json_parser.add_argument('start_time', location='json', type=str, help="GTE to start_time field", required=False)
+    json_parser.add_argument('end_time', location='json', type=str, help="Less than to end_time field", required=False)
+    json_parser.add_argument('polygon', location='json', type=list, help="Bounding geo-polygon", required=False)
+
     model = api.model('IdsByDataset', {
         'success': fields.Boolean(description="success flag"),
         'message': fields.String(description="message"),
@@ -215,13 +229,26 @@ class IdsByDataset(Resource):
     decorators = [limiter.limit("10/second")]
 
     @token_required
+    @pele_ns.expect(arg_parser)
     @api.marshal_with(model)
     @api.doc(security='apikey')
     def get(self, dataset_name):
+        start_time = request.args.get('start_time', None)
+        end_time = request.args.get('end_time', None)
+        polygon = request.args.get('polygon', None)
+
+        if polygon is not None:
+            try:
+                polygon = parse_polygon(polygon)
+            except Exception as e:
+                return {'success': False, 'message': str(e)}, 400
+
         try:
             index = current_app.config["ES_INDEX"]
             page_size, offset = get_page_size_and_offset(request)
-            total, ids = current_app.es_util.query_ids_by_dataset(index, dataset_name, offset, page_size)
+            total, ids = current_app.es_util.query_ids_by_dataset(index, dataset_name, offset, page_size,
+                                                                  start_time=start_time, end_time=end_time,
+                                                                  polygon=polygon)
             return {
                 'success': True,
                 'total': total,
@@ -231,10 +258,7 @@ class IdsByDataset(Resource):
                 'dataset_ids': ids
             }
         except Exception as e:
-            return {
-                'success': False,
-                'message': str(e),
-            }, 500
+            return {'success': False, 'message': str(e)}, 500
 
 
 @pele_ns.route('/type/<string:type_name>/dataset_ids', endpoint='ids_by_type')
