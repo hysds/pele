@@ -1,4 +1,6 @@
 from builtins import str
+
+import traceback
 from flask import current_app, request
 from flask_restx import Resource, fields, inputs
 
@@ -51,6 +53,7 @@ class Types(Resource):
                 'types': types
             }
         except Exception as e:
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'message': str(e),
@@ -96,6 +99,7 @@ class Datasets(Resource):
                 'datasets': datasets
             }
         except Exception as e:
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'message': str(e),
@@ -142,6 +146,7 @@ class DatasetsByType(Resource):
                 'datasets': datasets
             }
         except Exception as e:
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'message': str(e),
@@ -188,6 +193,7 @@ class TypesByDataset(Resource):
                 'types': types
             }
         except Exception as e:
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'message': str(e),
@@ -241,7 +247,10 @@ class IdsByDataset(Resource):
             try:
                 polygon = parse_polygon(polygon)
             except Exception as e:
-                return {'success': False, 'message': str(e)}, 400
+                return {
+                    'success': False,
+                    'message': str(e)
+                }, 400
 
         try:
             index = current_app.config["ES_INDEX"]
@@ -258,7 +267,11 @@ class IdsByDataset(Resource):
                 'dataset_ids': ids
             }
         except Exception as e:
-            return {'success': False, 'message': str(e)}, 500
+            current_app.logger.error(traceback.format_exc())
+            return {
+                'success': False,
+                'message': str(e),
+            }, 500
 
 
 @pele_ns.route('/type/<string:type_name>/dataset_ids', endpoint='ids_by_type')
@@ -301,6 +314,7 @@ class IdsByType(Resource):
                 'dataset_ids': ids
             }
         except Exception as e:
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'message': str(e),
@@ -384,6 +398,7 @@ class FieldsByTypeDataset(Resource):
                 'results': docs
             }
         except Exception as e:
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'message': str(e),
@@ -431,6 +446,7 @@ class OverlapsById(Resource):
                 'results': docs
             }
         except Exception as e:
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'message': str(e),
@@ -486,6 +502,7 @@ class OverlapsByIdTypeDataset(Resource):
                 'results': docs
             }
         except Exception as e:
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'message': str(e),

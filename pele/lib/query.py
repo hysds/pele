@@ -240,7 +240,7 @@ class QueryES(object):
         s = s[offset:offset + page_size]
         if self.logger:
             self.logger.debug(s.to_dict())
-        return s.count(), [i['_id'] for i in s]
+        return s.count(), [i['id'] for i in s]
 
     def query_id(self, index, _id):
         """Return metadata for dataset ID:

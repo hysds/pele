@@ -55,7 +55,7 @@ def token_required(f):
             current_app.logger.debug("jwt.InvalidTokenError: {}".format(traceback.format_exc()))
             return invalid_msg, 401
         except Exception as e:
-            current_app.logger.debug(traceback.format_exc())
+            current_app.logger.error(traceback.format_exc())
             return {
                 'message': "Unknown error: {}".format(str(e)),
                 'success': False
