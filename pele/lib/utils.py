@@ -1,4 +1,9 @@
-import os, sys, re, json, requests, collections
+import os
+import sys
+import re
+import json
+import requests
+import collections
 from io import StringIO
 from lxml.etree import XMLParser, parse, tostring
 from tempfile import mkstemp

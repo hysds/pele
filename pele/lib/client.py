@@ -1,5 +1,6 @@
 from builtins import object
-import requests, time
+import requests
+import time
 
 
 class PeleRequests(object):

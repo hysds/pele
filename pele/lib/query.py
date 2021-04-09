@@ -188,7 +188,7 @@ class QueryES(object):
           ]
         }
         :param index: Elasticsearch index/alias
-        :param dataset: dataset field
+        :param dataset: dataset field in ES
         :param offset: page offset from 0
         :param page_size: self-explanatory
         :param start_time: (optional) Greater than or equal of Timestamp field (start_time) in ISO format
@@ -212,16 +212,13 @@ class QueryES(object):
                 }
             })
 
-        print(s.to_dict())
-
         s._source = ['id']
-        s = s[offset:offset + page_size]
         if self.logger:
             self.logger.debug(s.to_dict())
-
+        s = s[offset:offset + page_size]
         return s.count(), [i['id'] for i in s]
 
-    def query_ids_by_type(self, index, dataset_type, offset, page_size):
+    def query_ids_by_type(self, index, dataset_type, offset, page_size, start_time=None, end_time=None, polygon=None):
         """Return list of ids by type:
         {
           "query": {
@@ -233,13 +230,35 @@ class QueryES(object):
             "_id"
           ]
         }
+        :param index: Elasticsearch index/alias
+        :param dataset_type: dataset_type field in ES
+        :param offset: page offset from 0
+        :param page_size: self-explanatory
+        :param start_time: (optional) Greater than or equal of Timestamp field (start_time) in ISO format
+        :param end_time: (optional) Less than of Timestamp field (end_time) in ISO format
+        :param polygon: (optional) List[List[int]]
+        :return: Elasticsearch document
         """
 
         s = Search(using=self.client, index=index).query(Q('term', dataset_type__keyword=dataset_type))
+        if start_time is not None:
+            s = s.query('range', **{'starttime': {'gte': start_time}})
+        if end_time is not None:
+            s = s.query('range', **{'endtime': {'lt': end_time}})
+        if polygon is not None:
+            s = s.query('geo_shape', **{
+                'location': {
+                    'shape': {
+                        'type': 'polygon',
+                        'coordinates': polygon
+                    }
+                }
+            })
+
         s._source = ['id']
-        s = s[offset:offset + page_size]
         if self.logger:
             self.logger.debug(s.to_dict())
+        s = s[offset:offset + page_size]
         return s.count(), [i['id'] for i in s]
 
     def query_id(self, index, _id):
@@ -261,7 +280,7 @@ class QueryES(object):
         resp = s.execute()
         return resp[0].to_dict() if s.count() > 0 else None
 
-    def query_fields(self, index, terms, fields, offset, page_size):
+    def query_fields(self, index, terms, fields, offset, page_size, start_time=None, end_time=None, polygon=None):
         """Return list of documents by term bool query:
         {
           "query": {
@@ -286,6 +305,15 @@ class QueryES(object):
             "location"
           ]
         }
+        :param index: Elasticsearch index/alias
+        :param terms: Dict; "custom" fields to filter on
+        :param fields: fields to be returned by Elasticsearch
+        :param offset: page offset from 0
+        :param page_size: self-explanatory
+        :param start_time: (optional) Greater than or equal of Timestamp field (start_time) in ISO format
+        :param end_time: (optional) Less than of Timestamp field (end_time) in ISO format
+        :param polygon: (optional) List[List[int]]
+        :return: Elasticsearch document
         """
 
         q = None
@@ -295,9 +323,23 @@ class QueryES(object):
                 q = Q('term', **{f: val})
             else:
                 q += Q('term', **{f: val})
-        s = Search(using=self.client, index=index).query(q)
-        s._source = fields
 
+        s = Search(using=self.client, index=index).query(q)
+        if start_time is not None:
+            s = s.query('range', **{'starttime': {'gte': start_time}})
+        if end_time is not None:
+            s = s.query('range', **{'endtime': {'lt': end_time}})
+        if polygon is not None:
+            s = s.query('geo_shape', **{
+                'location': {
+                    'shape': {
+                        'type': 'polygon',
+                        'coordinates': polygon
+                    }
+                }
+            })
+
+        s._source = fields
         # sort by starttime in descending order; TODO: expose sort parameters out through API
         s = s.sort({
             "starttime": {

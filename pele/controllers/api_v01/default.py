@@ -1,5 +1,7 @@
 from builtins import str
-import traceback, jwt, uuid
+import traceback
+import jwt
+import uuid
 from datetime import datetime, timedelta
 
 from flask import current_app, g, url_for
