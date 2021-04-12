@@ -1,7 +1,6 @@
-from flask import current_app
 from flask_restx import fields
 
-from pele.controllers.api_v01.config import api, pele_ns
+from pele.controllers.api_v01.config import api
 
 
 CENTER_MODEL = api.model('Center', { 

@@ -1,6 +1,6 @@
 from builtins import object
 import json
-from elasticsearch_dsl import FacetedSearch, Search, Q, A
+from elasticsearch_dsl import Search, Q, A
 from flask import current_app
 
 from pele import cache
@@ -442,13 +442,11 @@ class QueryES(object):
                 t += Q('term', **{f: val})
 
         # set temporal query
-        q = None
-        if starttime is not None and endtime is not None:
-            q = Q('range', **{'endtime': {'gt': starttime}}) + Q('range', **{'starttime': {'lt': endtime}})
-        elif starttime is not None and endtime is None:
-            q = Q('range', **{'endtime': {'gt': starttime}})
-        elif starttime is None and endtime is not None:
-            q = Q('range', **{'starttime': {'lt': endtime}})
+        q = Q()
+        if starttime is not None:
+            q += Q('range', **{'endtime': {'gt': starttime}})
+        if endtime is not None:
+            q += Q('range', **{'starttime': {'lt': endtime}})
 
         # set spatial filter
         f = None
@@ -459,7 +457,7 @@ class QueryES(object):
         s = Search(using=self.client, index=index)
         if t is not None:
             s = s.query(t)
-        if q is not None:
+        if q != Q():
             s = s.query(q)
         if f is not None:
             s = s.filter(f)

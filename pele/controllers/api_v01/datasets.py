@@ -2,13 +2,13 @@ from builtins import str
 
 import traceback
 from flask import current_app, request
-from flask_restx import Resource, fields, inputs
+from flask_restx import Resource, fields
 
 from pele import limiter
 from pele.controllers import token_required
 from pele.lib.query import get_page_size_and_offset, parse_polygon
 from pele.controllers.api_v01.config import api, pele_ns
-from pele.controllers.api_v01.model import *
+from pele.controllers.api_v01.model import METADATA_MODEL
 
 
 @pele_ns.route('/types', endpoint='types')
