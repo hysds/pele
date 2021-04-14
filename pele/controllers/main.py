@@ -1,4 +1,7 @@
-import os, json, requests, types
+import os
+import json
+import requests
+import types
 from datetime import datetime
 from flask import Blueprint, render_template, flash, request, redirect, url_for, Response, current_app, jsonify
 from flask_login import login_user, logout_user, login_required

@@ -1,4 +1,8 @@
-import os, sys, click, unittest, coverage
+import os
+import sys
+import click
+import unittest
+import coverage
 from flask_migrate import Migrate, MigrateCommand
 
 from pele import create_app, db

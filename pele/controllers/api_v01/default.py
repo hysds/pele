@@ -1,5 +1,7 @@
 from builtins import str
-import traceback, jwt, uuid
+import traceback
+import jwt
+import uuid
 from datetime import datetime, timedelta
 
 from flask import current_app, g, url_for
@@ -45,7 +47,7 @@ class Register(Resource):
         try:
             db.session.commit()
         except Exception as e:
-            current_app.logger.debug(traceback.format_exc())
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'message': "Registration failed. Please contact support."
@@ -129,7 +131,7 @@ class Login(Resource):
                 'exp': datetime.utcnow() + timedelta(seconds=current_app.config['TOKEN_EXPIRATION_SECS'])},
                 current_app.config['SECRET_KEY'])
         except Exception as e:
-            current_app.logger.debug(traceback.format_exc())
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'message': "Login failed. Please contact support."
