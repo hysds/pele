@@ -159,8 +159,8 @@ r.json()
 Ensure your login creds are set in your .netrc file, e.g.
 ```bash
 cat ~/.netrc
-machine localhost login koa@test.com password test
-macdef init
+# machine localhost login koa@test.com password test
+# macdef init
 
 
 ```
