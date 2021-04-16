@@ -6,6 +6,9 @@ from flask import current_app
 from pele import cache
 
 
+MAX_SIZE = 2147483647
+
+
 def get_page_size(r):
     """Return page size."""
     page_size = int(r.form.get('page_size', r.args.get('page_size', current_app.config['DEFAULT_PAGE_SIZE'])))
@@ -73,7 +76,7 @@ class QueryES(object):
         """
 
         s = Search(using=self.client, index=index).extra(size=0)
-        a = A('terms', field='dataset_type.keyword')
+        a = A('terms', field='dataset_type.keyword', size=MAX_SIZE)
         s.aggs.bucket('types', a)
 
         if self.logger:
@@ -101,7 +104,7 @@ class QueryES(object):
         """
 
         s = Search(using=self.client, index=index).extra(size=0)
-        a = A('terms', field='dataset.keyword')
+        a = A('terms', field='dataset.keyword', size=MAX_SIZE)
         s.aggs.bucket('datasets', a)
 
         if self.logger:
@@ -132,7 +135,7 @@ class QueryES(object):
 
         s = Search(using=self.client, index=index).extra(size=0)
         q = Q('term', dataset_type__keyword=dataset_type)
-        a = A('terms', field='dataset.keyword')
+        a = A('terms', field='dataset.keyword', size=MAX_SIZE)
         s = s.query(q)
         s.aggs.bucket('datasets', a)
 
@@ -164,7 +167,7 @@ class QueryES(object):
 
         s = Search(using=self.client, index=index).extra(size=0)
         q = Q('term', dataset__keyword=dataset)
-        a = A('terms', field='dataset_type.keyword')
+        a = A('terms', field='dataset_type.keyword', size=MAX_SIZE)
         s = s.query(q)
         s.aggs.bucket('types', a)
 
