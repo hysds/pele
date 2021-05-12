@@ -24,7 +24,7 @@ setup(
         'Flask-Login',
         'Flask-Mail',
         'Flask-Migrate',
-        'flask-restx>=0.2.0',
+        'flask-restx>=0.4.0',
         'Flask-Script',
         'Flask-SQLAlchemy',
         'Flask-Testing',
