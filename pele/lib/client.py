@@ -35,6 +35,9 @@ def getPeleExtentFromOGRFile(ogrFileName, layerName=None):
         result.append([top, right])
         result.append([top, left])
         result.append([bottom, left])
+
+        # make sure to conform to filter format
+        result = [result]
     else:
         print("No suitable layer found.")
 
