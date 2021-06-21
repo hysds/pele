@@ -1,7 +1,45 @@
 from builtins import object
 import requests
 import time
+from osgeo import ogr
 
+# Utility function that returns the extent for the features in the 
+# given file (and optionally named layer), returned in the format 
+# compatible with pele/ES geospatial searches.
+#
+def getPeleExtentFromOGRFile(ogrFileName, layerName=None):
+    result = None
+    layer = None
+
+    # an exception will be thrown if Open() fails, so we
+    # won't bother checking to see if dataset is None
+    dataset = ogr.Open(ogrFileName, update=0)
+    if layerName is not None:
+        layer = dataset.GetLayerByName(layerName)
+    else:
+        # no named layer
+        if dataset.GetLayerCount() > 1:
+            print("No layer name specified for a multi-layer file, using top layer.")
+        layer = dataset.GetLayer(0)
+
+    if layer is not None:
+        extent = layer.GetExtent()
+        bottom = extent[0]
+        top = extent[1]
+        left = extent[2]
+        right = extent[3]
+
+        result = []
+        result.append([bottom, left])
+        result.append([bottom, right])
+        result.append([top, right])
+        result.append([top, left])
+        result.append([bottom, left])
+    else:
+        print("No suitable layer found.")
+
+    return result
+    
 
 class PeleRequests(object):
     def __init__(self, base_url, verify=True, auth=True):
