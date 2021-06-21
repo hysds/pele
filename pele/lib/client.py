@@ -3,43 +3,54 @@ import requests
 import time
 from osgeo import ogr
 
+
 # Utility function that returns the extent for the features in the 
 # given file (and optionally named layer), returned in the format 
 # compatible with pele/ES geospatial searches.
 #
 def getPeleExtentFromOGRFile(ogrFileName, layerName=None):
     result = None
-    layer = None
 
-    # an exception will be thrown if Open() fails, so we
-    # won't bother checking to see if dataset is None
+    # Note: tried using 'ogr.UseExceptions()' to have Open throw an exception on failure but
+    # it wouldn't do it...
     dataset = ogr.Open(ogrFileName, update=0)
+
+    if dataset is None:
+        raise RuntimeError('Unable to open file: {}. It either does not exist or is not a supported type'.format(ogrFileName))
+        
+    layer = None
     if layerName is not None:
         layer = dataset.GetLayerByName(layerName)
     else:
         # no named layer
         if dataset.GetLayerCount() > 1:
-            print("No layer name specified for a multi-layer file, using top layer.")
+            print('No layer name specified for a multi-layer file {}, using top layer.'.format(ogrFileName))
         layer = dataset.GetLayer(0)
 
-    if layer is not None:
-        extent = layer.GetExtent()
-        bottom = extent[0]
-        top = extent[1]
-        left = extent[2]
-        right = extent[3]
+    if layer is None:
+        if layerName is not None:
+            raise RuntimeError('Unable to extract layer: {} from file: {}'.format(layerName,ogrFileName))
+        else:
+            raise RuntimeError('Unable to extract top layer from file: {}'.format(ogrFileName))
 
-        result = []
-        result.append([bottom, left])
-        result.append([bottom, right])
-        result.append([top, right])
-        result.append([top, left])
-        result.append([bottom, left])
+    extent = layer.GetExtent()
+    bottom = extent[0]
+    top = extent[1]
+    left = extent[2]
+    right = extent[3]
 
-        # make sure to conform to filter format
-        result = [result]
-    else:
-        print("No suitable layer found.")
+    result = []
+    result.append([bottom, left])
+    result.append([bottom, right])
+    result.append([top, right])
+    result.append([top, left])
+    result.append([bottom, left])
+
+    # conform to filter format
+    result = [result]
+
+    # dereference dataset to close the datasource - https://gdal.org/api/python_gotchas.html
+    dataset = None
 
     return result
     
