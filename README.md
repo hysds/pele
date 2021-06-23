@@ -155,24 +155,4 @@ r.json()
 # {u'message': u'hello world', u'success': True}
 ```
 
-### use the Pele requests client to handle token expiration/refreshing for you
-Ensure your login creds are set in your .netrc file, e.g.
-```bash
-cat ~/.netrc
-# machine localhost login koa@test.com password test
-# macdef init
-
-
-```
-The Pele requests client will then use your creds to attain an API token to use for subsequent API calls. When the token expires, the client will refresh the token automatically:
-```python
-from pele.lib.client import PeleRequests
-    
-base_url = "http://localhost:8877/api/v0.1"
-
-# instantiate PeleRequests object
-pr = PeleRequests(base_url)
-
-# now use like requests module (`request()`, `get()`, `head()`, `post()`, `put()`, `delete()`, `patch()`)
-r = pr.get(base_url + '/test/echo', params={'echo_str': 'hello world'})
-```
+### the Pele requests client handles token expiration/refreshing for you, see https://github.com/hysds/pele-client
