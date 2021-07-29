@@ -33,7 +33,7 @@ setup(
         'elasticsearch>=7.0.0,<8.0.0',
         'elasticsearch-dsl>=7.0.0,<8.0.0',
         'pyshp',
-        'shapely==1.5.15',
+        'shapely>=1.5.15',
         'Cython',
         # 'Cartopy==0.13.1',
         'redis',
