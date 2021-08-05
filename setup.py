@@ -29,7 +29,7 @@ setup(
         'Flask-Testing>=0.8.1,<1.0.0',
         'Flask-WTF>=0.14.3,<1.0.0',
         'elasticsearch>=7.0.0,<7.14.0',
-        'elasticsearch-dsl>=7.0.0,<7.14.0',
+        'elasticsearch-dsl>=7.0.0,<=7.4.0',
         'shapely==1.5.15',
         'PyJWT==1.7.1',
         "aws-requests-auth==0.4.2",
