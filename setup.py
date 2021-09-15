@@ -14,7 +14,6 @@ setup(
         # TODO: remove these pins on flask/extensions once the celery issue above is resolved
         'Flask>2.0.0,<3.0.0',
         'flask-restx>=0.5.1',
-        'Flask>=1.1.2,<2.0.0',
         'Flask-Assets>=2.0,<3.0.0',
         'Flask-Bcrypt>=0.7.1,<1.0.0',
         'Flask-Caching>=1.10.1,<2.0.0',
