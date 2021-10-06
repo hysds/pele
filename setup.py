@@ -12,7 +12,8 @@ setup(
         # https://github.com/celery/celery/issues/6768
         'click>=7.0,<8.0',
         # TODO: remove these pins on flask/extensions once the celery issue above is resolved
-        'flask-restx>=0.4.0',
+        'Flask<2.0.0',
+        'flask-restx>=0.4.0,<0.5.0',
         'Flask>=1.1.2,<2.0.0',
         'Flask-Assets>=2.0,<3.0.0',
         'Flask-Bcrypt>=0.7.1,<1.0.0',
@@ -29,8 +30,8 @@ setup(
         'Flask-Testing>=0.8.1,<1.0.0',
         'Flask-WTF>=0.14.3,<1.0.0',
         'elasticsearch>=7.0.0,<7.14.0',
-        'elasticsearch-dsl>=7.0.0,<=7.4.0',
-        'shapely==1.5.15',
+        'elasticsearch-dsl>=7.0.0,<7.4.0',
+        'shapely>=1.5.15,<1.7.0',
         'PyJWT==1.7.1',
         "aws-requests-auth==0.4.2",
         'gunicorn',
