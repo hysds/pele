@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pele',
-    version='1.1.0',
+    version='1.1.2',
     long_description='REST API for HySDS Datasets',
     packages=find_packages(),
     include_package_data=True,
@@ -29,9 +29,10 @@ setup(
         'Flask-Testing>=0.8.1,<1.0.0',
         'Flask-WTF>=0.15.1,<1.0.0',
         'elasticsearch>=7.0.0,<7.14.0',
-        'elasticsearch-dsl>=7.0.0,<=7.4.0',
-        'shapely==1.5.15',
+        'elasticsearch-dsl>=7.0.0,<7.4.0',
+        'shapely>=1.5.15,<1.7.0',
         'PyJWT==1.7.1',
+        'WTForms>=2.0.0,<3.0.0',
         "aws-requests-auth==0.4.2",
         'gunicorn',
         'gevent',
