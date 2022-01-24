@@ -1,9 +1,7 @@
 import os
-import sys
-import click
 import unittest
 import coverage
-from flask_migrate import Migrate, MigrateCommand
+from flask_migrate import Migrate
 
 from pele import create_app, db
 
@@ -24,7 +22,7 @@ migrate = Migrate(app, db)
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(app=app, db=db, User=User)
+    return dict(app=app, db=db)
 
 
 @app.cli.command()
