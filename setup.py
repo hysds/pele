@@ -24,7 +24,7 @@ setup(
         'Flask-SQLAlchemy>=2.5.1',
         'Flask-Testing>=0.8.1',
         'Flask-WTF>=0.15.1',
-        "elasticsearch>=7.0.0,<8.0.0",
+        "elasticsearch>=7.0.0,7.14.0",
         'shapely>=1.5.15,<1.7.0',
         'PyJWT==1.7.1',
         'WTForms>=2.0.0',
