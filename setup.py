@@ -29,7 +29,7 @@ setup(
         'shapely>=1.5.15,<1.7.0',
         'PyJWT==1.7.1',
         'WTForms>=2.0.0',
-        "aws-requests-auth==0.4.2",
+        "aws-requests-auth>=0.4.2",
         'gunicorn',
         'gevent',
         'eventlet',
