@@ -130,7 +130,7 @@ def create_app(object_name):
     # /export/home/hysdsops/sciflo/lib/python3.9/site-packages/flask/scaffold.py:57:
     # UserWarning: The name 'restx_doc' is already registered for this blueprint.
     # Use 'name=' to provide a unique name. This will become an error in Flask 2.1.
-    app.register_blueprint(apidoc.apidoc, name="pele_restex_doc")
+    app.register_blueprint(apidoc.apidoc, name="pele_restx_doc")
 
     return app
 
