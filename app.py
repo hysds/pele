@@ -1,9 +1,7 @@
 import os
-import sys
-import click
 import unittest
 import coverage
-from flask_migrate import Migrate, MigrateCommand
+from flask_migrate import Migrate
 
 from pele import create_app, db
 

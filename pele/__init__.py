@@ -125,7 +125,12 @@ def create_app(object_name):
 
     from .controllers.api_v01 import services as api_v01
     app.register_blueprint(api_v01)
-    app.register_blueprint(apidoc.apidoc)
+    # If a unique name is not specified, the following warning is issued:
+    #
+    # /export/home/hysdsops/sciflo/lib/python3.9/site-packages/flask/scaffold.py:57:
+    # UserWarning: The name 'restx_doc' is already registered for this blueprint.
+    # Use 'name=' to provide a unique name. This will become an error in Flask 2.1.
+    app.register_blueprint(apidoc.apidoc, name="pele_restx_doc")
 
     return app
 

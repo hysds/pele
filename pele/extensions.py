@@ -7,7 +7,7 @@ from flask_assets import Environment
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
 from flask_limiter import Limiter
-from flask_limiter.util import get_ipaddr
+from flask_limiter.util import get_remote_address
 from flask_mail import Mail
 
 
@@ -37,7 +37,7 @@ db = SQLAlchemy()
 auth = HTTPBasicAuth()
 
 # set up limiter
-limiter = Limiter(key_func=get_ipaddr)
+limiter = Limiter(key_func=get_remote_address)
 
 # set up mail
 mail = Mail()
