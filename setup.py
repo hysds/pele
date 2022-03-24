@@ -46,5 +46,6 @@ setup(
         'lxml',
         'nodeenv',
         'botocore',
+        'Jinja2==3.0.3',
     ]
 )
