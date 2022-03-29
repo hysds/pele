@@ -47,5 +47,6 @@ setup(
         'nodeenv',
         'botocore',
         'Jinja2==3.0.3',
+        'Werkzeug==2.0.3'
     ]
 )
