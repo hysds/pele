@@ -27,7 +27,7 @@ setup(
         "elasticsearch>=7.0.0,<7.14.0",
         'elasticsearch-dsl>=7.0.0,<7.4.0',
         'shapely>=1.5.15,<1.7.0',
-        'PyJWT==1.7.1',
+        'PyJWT==2.4.0',
         'WTForms>=2.0.0',
         "aws-requests-auth>=0.4.2",
         'gunicorn',
