@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pele',
-    version='1.1.4',
+    version='1.1.5',
     long_description='REST API for HySDS Datasets',
     packages=find_packages(),
     include_package_data=True,
@@ -45,6 +45,7 @@ setup(
         'webassets',
         'lxml',
         'nodeenv',
-        'botocore'
+        'botocore',
+        "werkzeug==2.1.2",  # TODO: remove this pin after fix has been made https://stackoverflow.com/a/73105878
     ]
 )
