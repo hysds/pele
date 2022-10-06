@@ -41,7 +41,7 @@ setup(
         # 'Cartopy==0.13.1',
         'redis',
         'cryptography==3.4.8',
-        'bcrypt',
+        'bcrypt==3.2.2',
         'coverage',
         'webassets',
         'lxml',
