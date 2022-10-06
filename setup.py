@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pele',
-    version='1.1.5',
+    version='1.1.6',
     long_description='REST API for HySDS Datasets',
     packages=find_packages(),
     include_package_data=True,
@@ -40,7 +40,8 @@ setup(
         'Cython',
         # 'Cartopy==0.13.1',
         'redis',
-        'bcrypt',
+        'cryptography==3.4.8',
+        'bcrypt==3.2.2',
         'coverage',
         'webassets',
         'lxml',
