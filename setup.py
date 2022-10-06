@@ -40,6 +40,7 @@ setup(
         'Cython',
         # 'Cartopy==0.13.1',
         'redis',
+        'cryptography==3.4.8',
         'bcrypt',
         'coverage',
         'webassets',
