@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name='pele',
-    version='1.1.6',
+    version='1.1.7',
     long_description='REST API for HySDS Datasets',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'Flask>=2.0.0',
+        'Flask>=2.2.0',
         'flask-restx>=0.5.1',
         'Flask-Assets>=2.0',
         'Flask-Bcrypt>=0.7.1',
@@ -21,7 +21,7 @@ setup(
         'Flask-Mail>=0.9.1',
         'Flask-Migrate>=2.7.0',  # may need to look into sdscli to update this to >=3.0.0
         'Flask-Script>=2.0.6',
-        'Flask-SQLAlchemy>=2.5.1',
+        'Flask-SQLAlchemy>=3.0.0',
         'Flask-Testing>=0.8.1',
         'Flask-WTF>=0.15.1',
         "elasticsearch>=7.0.0,<7.14.0",
@@ -47,6 +47,6 @@ setup(
         'lxml',
         'nodeenv',
         'botocore',
-        "werkzeug==2.1.2",  # TODO: remove this pin after fix has been made https://stackoverflow.com/a/73105878
+        "werkzeug>=2.2.0",  # TODO: remove this pin after fix has been made https://stackoverflow.com/a/73105878
     ]
 )
