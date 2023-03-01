@@ -46,7 +46,7 @@ setup(
         'webassets',
         'lxml',
         'nodeenv',
-        'botocore',
+        'botocore==1.29.80',
         "werkzeug>=2.2.0",  # TODO: remove this pin after fix has been made https://stackoverflow.com/a/73105878
     ]
 )
