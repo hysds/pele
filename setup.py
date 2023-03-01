@@ -40,13 +40,13 @@ setup(
         'Cython',
         # 'Cartopy==0.13.1',
         'redis',
-        'cryptography==3.4.8',
+        'cryptography',
         'bcrypt==3.2.2',
         'coverage',
         'webassets',
         'lxml',
         'nodeenv',
-        'botocore==1.29.80',
+        'botocore',
         "werkzeug>=2.2.0",  # TODO: remove this pin after fix has been made https://stackoverflow.com/a/73105878
     ]
 )
