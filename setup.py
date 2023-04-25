@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name='pele',
-    version='1.1.7',
+    version='1.1.8',
     long_description='REST API for HySDS Datasets',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'Flask>=2.2.0',
+        'Flask<2.3.0',  # TODO: remove kluge when Flask-DebugToolbar fixes import error
         'flask-restx>=0.5.1',
         'Flask-Assets>=2.0',
         'Flask-Bcrypt>=0.7.1',
