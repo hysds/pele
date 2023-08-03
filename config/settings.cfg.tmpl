@@ -1,8 +1,15 @@
 # ElasticSearch URL
+ES_ENGINE = "{{ GRQ_ES_ENGINE or 'elasticsearch' }}"
 AWS_ES = {{ GRQ_AWS_ES or False }}
-ES_HOST = "{{ GRQ_ES_PVT_IP }}"
-ES_URL = "{{ GRQ_ES_PROTOCOL or 'http' }}://{{ GRQ_ES_PVT_IP }}:{{ GRQ_ES_PORT or 9200 }}"
-ES_EXTERNAL_URL = "{{ GRQ_ES_PROTOCOL or 'http' }}://{{ GRQ_FQDN }}:{{ GRQ_ES_PORT or 9200 }}"
+
+{% if GRQ_ES_PVT_IP.startswith('https://') %}
+ES_URL = "{{ GRQ_ES_PVT_IP }}"
+ES_EXTERNAL_URL = "{{ GRQ_FQDN }}"
+{% else %}
+ES_URL = "{{ 'https://'~GRQ_ES_PVT_IP if GRQ_AWS_ES == true or 'es.amazonaws.com' in GRQ_ES_PVT_IP else 'http://'~GRQ_ES_PVT_IP~':9200' }}"
+ES_EXTERNAL_URL = "{{ 'https://'~GRQ_FQDN if GRQ_AWS_ES == true or 'es.amazonaws.com' in GRQ_FQDN else 'http://'~GRQ_FQDN~':9200' }}"
+{% endif %}
+
 
 # elastic search index to query
 ES_INDEX = "grq"

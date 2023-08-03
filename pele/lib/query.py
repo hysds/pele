@@ -1,12 +1,17 @@
 from builtins import object
 import json
-from elasticsearch_dsl import Search, Q, A
+
 from flask import current_app
+
+if current_app.config.get("ES_ENGINE") == "opensearch":
+    from opensearchpy import Search, Q, A
+else:
+    from elasticsearch_dsl import Search, Q, A
 
 from pele import cache
 
-
-MAX_SIZE = 2147483647
+# MAX_SIZE = 2147483647
+MAX_SIZE = 10000
 
 
 def get_page_size(r):
@@ -50,12 +55,12 @@ def get_page_size_and_offset(r):
 class QueryES(object):
     """Class for querying ES backend."""
 
-    def __init__(self, es_client, logger=None):
+    def __init__(self, es_client):
         """
         :param es_client: the object returned from Elasticsearch(...)
         """
         self.client = es_client
-        self.logger = logger
+        # self.logger = logger
 
     def query_types(self, index, offset, page_size):
         """Return list of dataset types:
@@ -79,8 +84,7 @@ class QueryES(object):
         a = A('terms', field='dataset_type.keyword', size=MAX_SIZE)
         s.aggs.bucket('types', a)
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
 
         types = [i['key'] for i in s.execute().aggregations.to_dict()['types']['buckets']]
         return len(types), types[offset:offset+page_size]
@@ -107,8 +111,7 @@ class QueryES(object):
         a = A('terms', field='dataset.keyword', size=MAX_SIZE)
         s.aggs.bucket('datasets', a)
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
 
         datasets = [i['key'] for i in s.execute().aggregations.to_dict()['datasets']['buckets']]
         return len(datasets), datasets[offset:offset+page_size]
@@ -139,8 +142,7 @@ class QueryES(object):
         s = s.query(q)
         s.aggs.bucket('datasets', a)
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
 
         datasets = [i['key'] for i in s.execute().aggregations.to_dict()['datasets']['buckets']]
         return len(datasets), datasets[offset:offset + page_size]
@@ -171,8 +173,7 @@ class QueryES(object):
         s = s.query(q)
         s.aggs.bucket('types', a)
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
 
         types = [i['key'] for i in s.execute().aggregations.to_dict()['types']['buckets']]
         return len(types), types[offset:offset+page_size]
@@ -216,8 +217,7 @@ class QueryES(object):
             })
 
         s._source = ['id']
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
         s = s[offset:offset + page_size]
         return s.count(), [i['id'] for i in s]
 
@@ -259,8 +259,7 @@ class QueryES(object):
             })
 
         s._source = ['id']
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
         s = s[offset:offset + page_size]
         return s.count(), [i['id'] for i in s]
 
@@ -278,8 +277,7 @@ class QueryES(object):
         }
         """
         s = Search(using=self.client, index=index).query(Q('term', _id=_id))
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
         resp = s.execute()
         return resp[0].to_dict() if s.count() > 0 else None
 
@@ -351,8 +349,7 @@ class QueryES(object):
         })
         s = s[offset:offset + page_size]
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
         return s.count(), [i.to_dict() for i in s]
 
     def overlaps(self, index, _id, terms, fields, offset, page_size):
@@ -425,8 +422,7 @@ class QueryES(object):
 
         # get document by id
         doc = self.query_id(index, _id)
-        if self.logger:
-            self.logger.debug(json.dumps(doc, indent=2))
+        current_app.logger.debug(json.dumps(doc, indent=2))
         if doc is None:
             raise RuntimeError("Failed to find dataset ID: {}".format(_id))
 
@@ -466,7 +462,5 @@ class QueryES(object):
             s = s.filter(f)
         s._source = fields
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
-
+        current_app.logger.debug(s.to_dict())
         return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]
