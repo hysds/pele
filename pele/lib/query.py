@@ -60,7 +60,6 @@ class QueryES(object):
         :param es_client: the object returned from Elasticsearch(...)
         """
         self.client = es_client
-        # self.logger = logger
 
     def query_types(self, index, offset, page_size):
         """Return list of dataset types:
