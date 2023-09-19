@@ -101,7 +101,12 @@ def create_app(object_name):
     cors.init_app(app)
     app.wsgi_app = ReverseProxied(app.wsgi_app, app.config)
 
-    app.es_util = QueryES(get_es_client(app.config))
+    if app.config.get("ES_ENGINE") == "opensearch":
+        from opensearchpy import Search, Q, A
+    else:
+        from elasticsearch_dsl import Search, Q, A
+
+    app.es_util = QueryES(get_es_client(app.config), Search, Q, A)
 
     # init extensions
     cache.init_app(app)
