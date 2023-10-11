@@ -2,10 +2,10 @@ ES_ENGINE = "{{ GRQ_ES_ENGINE or 'elasticsearch' }}"
 AWS_ES = {{ GRQ_AWS_ES or False }}
 
 # ElasticSearch URL
-{%- if GRQ_ES_PVT_IP.startswith('https://') %}
+{%- if GRQ_ES_FQDN.startswith('https://') %}
 ES_EXTERNAL_URL = "{{ GRQ_ES_FQDN }}"
 {%- else %}
-ES_EXTERNAL_URL = "{{ 'https://'~GRQ_FQDN if GRQ_AWS_ES == true or 'es.amazonaws.com' in GRQ_FQDN else 'http://'~GRQ_FQDN~':9200' }}"
+ES_EXTERNAL_URL = "{{ 'https://'~GRQ_ES_FQDN if GRQ_AWS_ES == true or 'es.amazonaws.com' in GRQ_FQDN else 'http://'~GRQ_ES_FQDN~':9200' }}"
 {%- endif %}
 
 {%- if GRQ_ES_PVT_IP is iterable and GRQ_ES_PVT_IP is not string %}

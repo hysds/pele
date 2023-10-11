@@ -20,7 +20,7 @@ def get_es_client(config):
                 credentials = boto3.Session().get_credentials()
                 auth = AWSV4SignerAuth(credentials, aws_region)
                 ES_CLIENT = OpenSearch(
-                    hosts=[es_url],
+                    hosts=es_url if isinstance(es_url, list) else [es_url],
                     http_auth=auth,
                     connection_class=RequestsHttpConnectionOS,
                     use_ssl=True,
@@ -37,7 +37,7 @@ def get_es_client(config):
                 credentials = boto3.Session().get_credentials()
                 auth = AWSV4SignerAuth(credentials, aws_region)
                 ES_CLIENT = Elasticsearch(
-                    hosts=[es_url],
+                    hosts=es_url if isinstance(es_url, list) else [es_url],
                     http_auth=auth,
                     connection_class=RequestsHttpConnectionES,
                     use_ssl=True,
