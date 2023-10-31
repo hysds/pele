@@ -1,12 +1,12 @@
 from builtins import object
 import json
-from elasticsearch_dsl import Search, Q, A
+
 from flask import current_app
 
 from pele import cache
 
-
-MAX_SIZE = 2147483647
+# MAX_SIZE = 2147483647
+MAX_SIZE = 10000
 
 
 def get_page_size(r):
@@ -50,12 +50,17 @@ def get_page_size_and_offset(r):
 class QueryES(object):
     """Class for querying ES backend."""
 
-    def __init__(self, es_client, logger=None):
+    def __init__(self, es_client, Search, Q, A):  # noqa
         """
         :param es_client: the object returned from Elasticsearch(...)
+        :param Search: function from elasticsearch DSL
+        :param Q: function from elasticsearch DSL
+        :param A: function from elasticsearch DSL
         """
         self.client = es_client
-        self.logger = logger
+        self.Search = Search
+        self.Q = Q
+        self.A = A
 
     def query_types(self, index, offset, page_size):
         """Return list of dataset types:
@@ -75,12 +80,11 @@ class QueryES(object):
         }
         """
 
-        s = Search(using=self.client, index=index).extra(size=0)
-        a = A('terms', field='dataset_type.keyword', size=MAX_SIZE)
+        s = self.Search(using=self.client, index=index).extra(size=0)
+        a = self.A('terms', field='dataset_type.keyword', size=MAX_SIZE)
         s.aggs.bucket('types', a)
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
 
         types = [i['key'] for i in s.execute().aggregations.to_dict()['types']['buckets']]
         return len(types), types[offset:offset+page_size]
@@ -103,12 +107,11 @@ class QueryES(object):
         }
         """
 
-        s = Search(using=self.client, index=index).extra(size=0)
-        a = A('terms', field='dataset.keyword', size=MAX_SIZE)
+        s = self.Search(using=self.client, index=index).extra(size=0)
+        a = self.A('terms', field='dataset.keyword', size=MAX_SIZE)
         s.aggs.bucket('datasets', a)
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
 
         datasets = [i['key'] for i in s.execute().aggregations.to_dict()['datasets']['buckets']]
         return len(datasets), datasets[offset:offset+page_size]
@@ -133,14 +136,13 @@ class QueryES(object):
         }
         """
 
-        s = Search(using=self.client, index=index).extra(size=0)
-        q = Q('term', dataset_type__keyword=dataset_type)
-        a = A('terms', field='dataset.keyword', size=MAX_SIZE)
+        s = self.Search(using=self.client, index=index).extra(size=0)
+        q = self.Q('term', dataset_type__keyword=dataset_type)
+        a = self.A('terms', field='dataset.keyword', size=MAX_SIZE)
         s = s.query(q)
         s.aggs.bucket('datasets', a)
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
 
         datasets = [i['key'] for i in s.execute().aggregations.to_dict()['datasets']['buckets']]
         return len(datasets), datasets[offset:offset + page_size]
@@ -165,14 +167,13 @@ class QueryES(object):
         }
         """
 
-        s = Search(using=self.client, index=index).extra(size=0)
-        q = Q('term', dataset__keyword=dataset)
-        a = A('terms', field='dataset_type.keyword', size=MAX_SIZE)
+        s = self.Search(using=self.client, index=index).extra(size=0)
+        q = self.Q('term', dataset__keyword=dataset)
+        a = self.A('terms', field='dataset_type.keyword', size=MAX_SIZE)
         s = s.query(q)
         s.aggs.bucket('types', a)
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
 
         types = [i['key'] for i in s.execute().aggregations.to_dict()['types']['buckets']]
         return len(types), types[offset:offset+page_size]
@@ -200,7 +201,7 @@ class QueryES(object):
         :return: Elasticsearch document
         """
 
-        s = Search(using=self.client, index=index).query(Q('term', dataset__keyword=dataset))
+        s = self.Search(using=self.client, index=index).query(self.Q('term', dataset__keyword=dataset))
         if start_time is not None:
             s = s.query('range', **{'starttime': {'gte': start_time}})
         if end_time is not None:
@@ -216,8 +217,7 @@ class QueryES(object):
             })
 
         s._source = ['id']
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
         s = s[offset:offset + page_size]
         return s.count(), [i['id'] for i in s]
 
@@ -243,7 +243,7 @@ class QueryES(object):
         :return: Elasticsearch document
         """
 
-        s = Search(using=self.client, index=index).query(Q('term', dataset_type__keyword=dataset_type))
+        s = self.Search(using=self.client, index=index).query(self.Q('term', dataset_type__keyword=dataset_type))
         if start_time is not None:
             s = s.query('range', **{'starttime': {'gte': start_time}})
         if end_time is not None:
@@ -259,8 +259,7 @@ class QueryES(object):
             })
 
         s._source = ['id']
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
         s = s[offset:offset + page_size]
         return s.count(), [i['id'] for i in s]
 
@@ -277,9 +276,8 @@ class QueryES(object):
           ]
         }
         """
-        s = Search(using=self.client, index=index).query(Q('term', _id=_id))
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        s = self.Search(using=self.client, index=index).query(self.Q('term', _id=_id))
+        current_app.logger.debug(s.to_dict())
         resp = s.execute()
         return resp[0].to_dict() if s.count() > 0 else None
 
@@ -323,11 +321,11 @@ class QueryES(object):
         for field, val in list(terms.items()):
             f = field.lower().replace('.', '__')
             if q is None:
-                q = Q('term', **{f: val})
+                q = self.Q('term', **{f: val})
             else:
-                q += Q('term', **{f: val})
+                q += self.Q('term', **{f: val})
 
-        s = Search(using=self.client, index=index).query(q)
+        s = self.Search(using=self.client, index=index).query(q)
         if start_time is not None:
             s = s.query('range', **{'starttime': {'gte': start_time}})
         if end_time is not None:
@@ -351,8 +349,7 @@ class QueryES(object):
         })
         s = s[offset:offset + page_size]
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
+        current_app.logger.debug(s.to_dict())
         return s.count(), [i.to_dict() for i in s]
 
     def overlaps(self, index, _id, terms, fields, offset, page_size):
@@ -425,8 +422,7 @@ class QueryES(object):
 
         # get document by id
         doc = self.query_id(index, _id)
-        if self.logger:
-            self.logger.debug(json.dumps(doc, indent=2))
+        current_app.logger.debug(json.dumps(doc, indent=2))
         if doc is None:
             raise RuntimeError("Failed to find dataset ID: {}".format(_id))
 
@@ -440,33 +436,31 @@ class QueryES(object):
         for field, val in list(terms.items()):
             f = field.lower().replace('.', '__')
             if t is None:
-                t = Q('term', **{f: val})
+                t = self.Q('term', **{f: val})
             else:
-                t += Q('term', **{f: val})
+                t += self.Q('term', **{f: val})
 
         # set temporal query
-        q = Q()
+        q = self.Q()
         if starttime is not None:
-            q += Q('range', **{'endtime': {'gt': starttime}})
+            q += self.Q('range', **{'endtime': {'gt': starttime}})
         if endtime is not None:
-            q += Q('range', **{'starttime': {'lt': endtime}})
+            q += self.Q('range', **{'starttime': {'lt': endtime}})
 
         # set spatial filter
         f = None
         if location is not None:
-            f = Q('geo_shape', **{'location': {'shape': location}})
+            f = self.Q('geo_shape', **{'location': {'shape': location}})
 
         # search
-        s = Search(using=self.client, index=index)
+        s = self.Search(using=self.client, index=index)
         if t is not None:
             s = s.query(t)
-        if q != Q():
+        if q != self.Q():
             s = s.query(q)
         if f is not None:
             s = s.filter(f)
         s._source = fields
 
-        if self.logger:
-            self.logger.debug(s.to_dict())
-
+        current_app.logger.debug(s.to_dict())
         return s.count(), [i.to_dict() for i in s[offset:offset+page_size]]
