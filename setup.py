@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pele',
-    version='1.2.0',
+    version='1.2.1',
     long_description='REST API for HySDS Datasets',
     packages=find_packages(),
     include_package_data=True,
@@ -27,7 +27,7 @@ setup(
         "elasticsearch>=7.0.0,<7.14.0",
         'elasticsearch-dsl>=7.0.0,<7.4.0',
         'opensearch-py>=2.3.0,<3.0.0',
-        'shapely>=1.5.15,<1.7.0',
+        'shapely>=1.5.15',
         'PyJWT==1.7.1',
         'WTForms>=2.0.0',
         'gunicorn',
