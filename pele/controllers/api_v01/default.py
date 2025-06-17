@@ -1,4 +1,3 @@
-from builtins import str
 import traceback
 import jwt
 import uuid
