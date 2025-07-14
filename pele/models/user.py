@@ -12,7 +12,7 @@ def authenticate(cls, email, password):
     if not user or not bcrypt.check_password_hash(user.password, password):
         return None
     if not user.verified:
-        current_app.logger.debug("User {} not verified.".format(user.email))
+        current_app.logger.debug(f"User {user.email} not verified.")
         return None
     return user
 

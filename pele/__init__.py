@@ -1,4 +1,3 @@
-from builtins import object
 import os
 import logging
 
@@ -24,7 +23,7 @@ class ListConverter(BaseConverter):
         return ','.join(super(ListConverter, self).to_url(value) for value in values)
     
 
-class ReverseProxied(object):
+class ReverseProxied:
     """Wrap the application in this middleware and configure the 
     front-end server to add these headers, to let you quietly bind 
     this to a URL other than / and to an HTTP scheme that is 

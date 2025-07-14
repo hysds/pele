@@ -1,5 +1,3 @@
-from builtins import str
-
 import traceback
 from flask import current_app, request
 from flask_restx import Resource, fields
@@ -498,7 +496,7 @@ class FieldsByTypeDataset(Resource):
         }
         try:
             index = current_app.config["ES_INDEX"]
-            index = "{}_*_{}".format(index, dataset_name.lower())
+            index = f"{index}_*_{dataset_name.lower()}"
             page_size, offset = get_page_size_and_offset(request)
             total, docs = current_app.es_util.query_fields(index, terms, ret_fields, offset, page_size,
                                                            start_time=start_time, end_time=end_time,
@@ -533,7 +531,7 @@ class FieldsByTypeDataset(Resource):
         }
         try:
             index = current_app.config["ES_INDEX"]
-            index = "{}_*_{}".format(index, dataset_name.lower())
+            index = f"{index}_*_{dataset_name.lower()}"
             page_size, offset = get_page_size_and_offset(request)
             total, docs = current_app.es_util.query_fields(index, terms, ret_fields, offset, page_size,
                                                            start_time=start_time, end_time=end_time,

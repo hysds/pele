@@ -1,4 +1,3 @@
-from builtins import object
 import json
 
 from flask import current_app
@@ -47,7 +46,7 @@ def get_page_size_and_offset(r):
     return page_size, offset
 
 
-class QueryES(object):
+class QueryES:
     """Class for querying ES backend."""
 
     def __init__(self, es_client, Search, Q, A):  # noqa
@@ -424,7 +423,7 @@ class QueryES(object):
         doc = self.query_id(index, _id)
         current_app.logger.debug(json.dumps(doc, indent=2))
         if doc is None:
-            raise RuntimeError("Failed to find dataset ID: {}".format(_id))
+            raise RuntimeError(f"Failed to find dataset ID: {_id}")
 
         # get spatial and temporal fields
         starttime = doc.get('starttime', None)
