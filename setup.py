@@ -50,5 +50,6 @@ setup(
         # TODO: remove this pin after fix has been made to resolve
         #  https://stackoverflow.com/questions/77213053/importerror-cannot-import-name-url-quote-from-werkzeug-urls
         "werkzeug<3.0.0",
+        "rich",
     ]
 )
