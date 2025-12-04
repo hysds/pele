@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pele',
-    version='1.3.0',
+    version='1.3.1',
     long_description='REST API for HySDS Datasets',
     packages=find_packages(),
     include_package_data=True,
@@ -50,5 +50,6 @@ setup(
         # TODO: remove this pin after fix has been made to resolve
         #  https://stackoverflow.com/questions/77213053/importerror-cannot-import-name-url-quote-from-werkzeug-urls
         "werkzeug<3.0.0",
+        "rich",
     ]
 )
