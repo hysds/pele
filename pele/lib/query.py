@@ -50,6 +50,13 @@ def get_page_size_and_offset(r):
 class QueryES(object):
     """Class for querying ES backend."""
 
+    # Parameters for handling closed indices
+    CLOSED_INDEX_PARAMS = {
+        "ignore_unavailable": True,
+        "allow_no_indices": True,
+        "expand_wildcards": "open"
+    }
+
     def __init__(self, es_client, Search, Q, A):  # noqa
         """
         :param es_client: the object returned from Elasticsearch(...)
@@ -61,6 +68,10 @@ class QueryES(object):
         self.Search = Search
         self.Q = Q
         self.A = A
+
+    def _create_search(self, index):
+        """Create a Search object with closed index handling parameters."""
+        return self.Search(using=self.client, index=index).params(**self.CLOSED_INDEX_PARAMS)
 
     def query_types(self, index, offset, page_size):
         """Return list of dataset types:
@@ -80,7 +91,7 @@ class QueryES(object):
         }
         """
 
-        s = self.Search(using=self.client, index=index).extra(size=0)
+        s = self._create_search(index).extra(size=0)
         a = self.A('terms', field='dataset_type.keyword', size=MAX_SIZE)
         s.aggs.bucket('types', a)
 
@@ -107,7 +118,7 @@ class QueryES(object):
         }
         """
 
-        s = self.Search(using=self.client, index=index).extra(size=0)
+        s = self._create_search(index).extra(size=0)
         a = self.A('terms', field='dataset.keyword', size=MAX_SIZE)
         s.aggs.bucket('datasets', a)
 
@@ -136,7 +147,7 @@ class QueryES(object):
         }
         """
 
-        s = self.Search(using=self.client, index=index).extra(size=0)
+        s = self._create_search(index).extra(size=0)
         q = self.Q('term', dataset_type__keyword=dataset_type)
         a = self.A('terms', field='dataset.keyword', size=MAX_SIZE)
         s = s.query(q)
@@ -167,7 +178,7 @@ class QueryES(object):
         }
         """
 
-        s = self.Search(using=self.client, index=index).extra(size=0)
+        s = self._create_search(index).extra(size=0)
         q = self.Q('term', dataset__keyword=dataset)
         a = self.A('terms', field='dataset_type.keyword', size=MAX_SIZE)
         s = s.query(q)
@@ -201,7 +212,7 @@ class QueryES(object):
         :return: Elasticsearch document
         """
 
-        s = self.Search(using=self.client, index=index).query(self.Q('term', dataset__keyword=dataset))
+        s = self._create_search(index).query(self.Q('term', dataset__keyword=dataset))
         if start_time is not None:
             s = s.query('range', **{'starttime': {'gte': start_time}})
         if end_time is not None:
@@ -243,7 +254,7 @@ class QueryES(object):
         :return: Elasticsearch document
         """
 
-        s = self.Search(using=self.client, index=index).query(self.Q('term', dataset_type__keyword=dataset_type))
+        s = self._create_search(index).query(self.Q('term', dataset_type__keyword=dataset_type))
         if start_time is not None:
             s = s.query('range', **{'starttime': {'gte': start_time}})
         if end_time is not None:
@@ -276,7 +287,7 @@ class QueryES(object):
           ]
         }
         """
-        s = self.Search(using=self.client, index=index).query(self.Q('term', _id=_id))
+        s = self._create_search(index).query(self.Q('term', _id=_id))
         current_app.logger.debug(s.to_dict())
         resp = s.execute()
         return resp[0].to_dict() if s.count() > 0 else None
@@ -325,7 +336,7 @@ class QueryES(object):
             else:
                 q += self.Q('term', **{f: val})
 
-        s = self.Search(using=self.client, index=index).query(q)
+        s = self._create_search(index).query(q)
         if start_time is not None:
             s = s.query('range', **{'starttime': {'gte': start_time}})
         if end_time is not None:
@@ -453,7 +464,7 @@ class QueryES(object):
             f = self.Q('geo_shape', **{'location': {'shape': location}})
 
         # search
-        s = self.Search(using=self.client, index=index)
+        s = self._create_search(index)
         if t is not None:
             s = s.query(t)
         if q != self.Q():
