@@ -36,4 +36,4 @@ class Echo(Resource):
                     'message': "Missing echo_str parameter."}, 400
 
         return { 'success': True,
-                 'message': "{}".format(echo_str) }
+                 'message': f"{echo_str}" }

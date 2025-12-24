@@ -1,4 +1,3 @@
-from builtins import object
 import os
 
 
@@ -6,7 +5,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DB_DIR = os.path.join(BASE_DIR, 'data')
 
 
-class Config(object):
+class Config:
     DB_DIR = DB_DIR
     SECRET_KEY = 'secret key'
     ES_URL = 'http://127.0.0.1:9200'  # default port is 9200

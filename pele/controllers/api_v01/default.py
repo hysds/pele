@@ -1,8 +1,7 @@
-from builtins import str
 import traceback
 import jwt
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from flask import current_app, g, url_for
 from flask_restx import Resource, fields, inputs
@@ -127,8 +126,8 @@ class Login(Resource):
         try:
             token = jwt.encode({
                 'sub': user.email,
-                'iat':datetime.utcnow(),
-                'exp': datetime.utcnow() + timedelta(seconds=current_app.config['TOKEN_EXPIRATION_SECS'])},
+                'iat':datetime.now(timezone.utc),
+                'exp': datetime.now(timezone.utc) + timedelta(seconds=current_app.config['TOKEN_EXPIRATION_SECS'])},
                 current_app.config['SECRET_KEY'])
         except Exception as e:
             current_app.logger.error(traceback.format_exc())
