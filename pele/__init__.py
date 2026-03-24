@@ -1,3 +1,7 @@
+from importlib.metadata import version
+
+__version__ = version("hysds-pele")
+
 import os
 import logging
 

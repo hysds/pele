@@ -1,0 +1,95 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hysds-pele"
+dynamic = ["version"]
+description = "REST API for HySDS Datasets"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.12"
+authors = [
+    {name = "HySDS", email = "hysds-help@jpl.nasa.gov"}
+]
+keywords = ["hysds", "pele", "rest-api", "datasets"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    # HySDS sibling packages (undeclared in original setup.py - now added)
+    "hysds-core~=7.0",
+    "hysds-commons~=7.0",
+    
+    # Core dependencies - matching original setup.py order and pins exactly
+    "Flask<2.3.0",
+    "flask-restx>=0.5.1",
+    "Flask-Assets>=2.0",
+    "Flask-Bcrypt>=0.7.1",
+    "Flask-Caching>=1.10.1",
+    "Flask-Cors>=3.0.10",
+    "Flask-DebugToolbar>=0.11.0",
+    "Flask-HTTPAuth>=4.4.0",
+    "Flask-Limiter>=1.4",
+    "Flask-Login>=0.5.0",
+    "Flask-Mail>=0.9.1",
+    "Flask-Migrate>=2.7.0",
+    "Flask-Script>=2.0.6",
+    "Flask-SQLAlchemy>=3.0.0",
+    "Flask-Testing>=0.8.1",
+    "Flask-WTF>=0.15.1",
+    "elasticsearch>=7.0.0,<7.14.0",
+    "elasticsearch-dsl>=7.0.0,<7.4.0",
+    "opensearch-py>=2.3.0,<3.0.0",
+    "shapely>=1.5.15",
+    "PyJWT==1.7.1",
+    "WTForms>=2.0.0",
+    "gunicorn",
+    "gevent",
+    "eventlet",
+    "supervisor",
+    "requests",
+    "simpleldap",
+    "pyshp",
+    "Cython",
+    "redis",
+    "cryptography",
+    "bcrypt==3.2.2",
+    "webassets",
+    "lxml",
+    "botocore",
+    "werkzeug<3.0.0",
+    "rich",
+    # Note: 'coverage' and 'nodeenv' moved to dev extra (were incorrectly in main deps)
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage",
+    "nodeenv",
+]
+
+[project.urls]
+Homepage = "https://github.com/hysds/pele"
+Repository = "https://github.com/hysds/pele"
+Issues = "https://github.com/hysds/pele/issues"
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = {version_scheme = "no-guess-dev"}
+
+[tool.hatch.build.targets.wheel]
+packages = ["pele"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/pele",
+    "README.md",
+    "LICENSE",
+]
