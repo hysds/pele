@@ -28,7 +28,7 @@ dependencies = [
     "hysds-commons>=7.0,<8.0",
     
     # Core dependencies - matching original setup.py order and pins exactly
-    "Flask<2.3.0",
+    "Flask>=2.2,<3.0",
     "flask-restx>=0.5.1",
     "Flask-Assets>=2.0",
     "Flask-Bcrypt>=0.7.1",
@@ -62,7 +62,7 @@ dependencies = [
     "cryptography",
     "bcrypt==3.2.2",
     "webassets",
-    "lxml",
+    "lxml>=3.4.0,<5.0.0",
     "botocore",
     "werkzeug<3.0.0",
     "rich",
