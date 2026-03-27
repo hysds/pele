@@ -92,7 +92,14 @@ def create_app(object_name):
 
     app = Flask(__name__)
     app.config.from_object(object_name)
-    app.config.from_pyfile('../settings.cfg')  # override
+    
+    # Look for settings.cfg in runtime location first (PyPI installs), then package location (editable installs)
+    import os
+    config_path = os.path.expanduser('~/sciflo/etc/pele_settings.cfg')
+    if not os.path.exists(config_path):
+        # Fallback to package-relative location for editable installs
+        config_path = '../settings.cfg'
+    app.config.from_pyfile(config_path)  # override
 
     # register converters
     app.url_map.converters['list'] = ListConverter
