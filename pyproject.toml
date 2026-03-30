@@ -76,6 +76,9 @@ dev = [
     "nodeenv",
 ]
 
+[project.scripts]
+pele-init-db = "pele.cli:init_db"
+
 [project.urls]
 Homepage = "https://github.com/hysds/pele"
 Repository = "https://github.com/hysds/pele"
